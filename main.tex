@@ -13,7 +13,6 @@
 \usepackage{times}            % pacote de fonte Adobe Times
 % \usepackage{palatino}
 % \usepackage{mathptmx}       % pacote de fonte Adobe Times nas fórmulas
-\usepackage{fixltx2e}         % pacote de fixes latex2
 \usepackage{fixmath}          % pacote de math international standardization
 \usepackage[alf,abnt-emphasize=bf]{abntex2cite}	% pacote de citações abnt
 
@@ -53,25 +52,16 @@
 %Agradeço ao \LaTeX\ por não ter vírus de macro\ldots
 
 
-%TODO reduzir abstract, tem que ser um parágrafo só, sem citações.
 \begin{abstract}
-  Although some content providers register access data from its users and can track their profile style for content recommendations intention, when two or more users share a same account, their true profile activity is obfuscated, this user behavior hinders the recommendation systems from providers. This work, differently from methods who use sessionization by timeout, proposes a way of separating the users sessions by content, opening the possibility for breaking them into different user profiles from a same account. The used method simulates an account by concatenating two sessions from different users, the objective of the method, is to reverse this process with accuracy.
+  Although some content providers register stream data from its users and can track their profile styling for content recommendation intentions, when two or more users share a same account, their true profile activity is obfuscated and fuzzed, this user behavior hinders the recommendation systems from providers. 
+  This work proposes a way of classifying users' stream data trough sessions based on its media content, opening the possibility for breaking a same account with multiple user profiles and consequently identifying this activity. In this work dimensionality reduction and clustering methods are used to classify user stream data into sessions that correspond to each respective user profile.
 \end{abstract}
 
 % resumo em português
 \begin{englishabstract}{}{Redução de dimensionalidade, Clusterização, Perfis de usuários, Identificação de sessões, Sistemas de recomendações}
 
-  Embora as provedoras de conteúdos possuam dados de acessos de seus usuários e consigam analisar seus perfis para fazer recomendações de conteúdo, quando duas ou mais pessoas compartilham da mesma conta, a atividade e perfil original e individual de cada usuário é obfuscada por essas contas compartilhadas, este comportamento confundem os sistemas de recomendação existentes. Este trabalho, diferentemente dos métodos de quebra de sessão por timeout, propõe uma maneira de segregar as sessões por análise de conteúdo, quebrando-as em diferentes perfis de uma mesma conta.
-
-  O método utilizado simula uma conta de múltiplos usuários concatenando duas sessões de usuários distintos, o objetivo do método proposto é fazer o processo inverso com precisão.
-  Dois métodos são comparados e ambos os métodos dependem de duas etapas inciais de preparação de dados:
-  
-  A primeira etapa aplica a técnica de redução de dimensionalidade de estado da arte TSNE, através dos dados de \textit{embeddings} dos textos de cada notícia.
-  
-  A segunda etapa, é aplicado um método de clusterização como o  \textit{affinity propagation} para identificar tópicos de notícias, nesta etapa cada tópica é rotulado com um nome fictício e legível por humanos.
-  
-  O primeiro método utiliza a distancia euclideana do plano de dimensionalidade reduzida, entre os itens atual e anterior ordenados na sessão, onde é aplicado uma sessionização através de um corte por distância máxima. Já no segundo método, cada usuário é perfilado por contagem de tópicos e usando um método de recomendação implícito com o \textit{Alternate Least Squares}, o corte é baseado no valor mínimo do percentual de predição de cada item da sessão em relação a um usuário.
-\cite{Jiang:2018:IUB:3209978.3210054}
+  Embora as provedoras de conteúdos registram dados de acessos de seus usuários e consigam analisar seus perfis para fazer recomendações de conteúdo, quando duas ou mais pessoas compartilham da mesma conta a atividade e perfil original e individual de cada usuário é obfuscada e difusa por essas contas compartilhadas, este comportamento confunde os sistemas de recomendação existentes. 
+  Este trabalho propõe uma maneira de classificar o fluxo de dados dos usuários em sessões baseando-se em seu conteúdo, abrindo portas para quebrar a mesma conta em múltiplos perfis de usuários e consequentemente identificando esta atividade. Neste trabalho Redução de dimensionalidade e métodos de clusterização são utilizados para classificar o fluxo de dados em sessões que correspondem respectivamente a cada perfil de usuário.
 \end{englishabstract}
 
 \listoffigures 
@@ -88,16 +78,14 @@
 
 % =======================================================================
 
-\chapter{Introduction} % Matheus: É válido dividir em subseções menores caso necessário?
+\chapter{Introduction}
 Most platforms nowadays rely on recommendation systems to create plug and play interactions between users and offered items, avoiding search time and making platform navigation minimal and crisp, however, some user behaviours or even the emerging privacy laws and growing concerns on data privacy, recommendation systems precision can get affected by profiling contamination on the user-item relations  and its interpretation by the system.
 
-One commonly known example responsible for grinding the recommendation systems performance is the practice of account sharing, mixing and masking its user profiles against its real users. Account sharing behaviour is non-intentional in most cases, since device sharing is common, there could be a situation where some individual into his computer is searching videos in a logged-in streaming platform for specific subjects like for example C++ usage, but at some point, it leaves the computer empty without performing account logout, another individual then starts using the same device and platform but for a completely different subject, like children's cartoon.
+One commonly known example responsible for grinding the recommendation systems performance is the practice of account sharing that mixes and masks its account profiles against its real users. Account sharing behaviour is non-intentional in most cases, since device sharing is common, there could be a situation where some individual into his computer is searching videos in a logged-in streaming platform for specific subjects like for example C++ usage, but at some point, it leaves the computer empty without performing account logout, another individual then starts using the same device and platform but for a completely different subject, like children's cartoon.
 
 This problem is evident on commonly used time-based session identification techniques such as \cite{10.1145/2736277.2741117}, the presented scenario would fail in identifying sessions, if chosen period threshold for breaking sessions is long enough, the elapsed time from user permutation usage on platform could be insignificant on the total session time, thus preserving the unity of the session, but in reality two completely sessions have happened during this period.
 
 On \cite{Jiang:2018:IUB:3209978.3210054} its main goal is identifying shared accounts in multimedia streaming and it addresses a clearly domain separation between \textit{account-level recommendation} and \textit{user-level recommendation}, but even so, they use a timeout along with their other techniques to break the session.
-
-% Exemplo: Uma pessoa está no youtube procurando e assistindo vídeos de implementação de estruturas de dados e programação dinâmica em C++. Logo em seguida, outra pessoa, usando a mesma conta no youtube, passa a procurar vídeos de desenho infantil. Nesse caso, há uma clara quebra de sessão (término da sessão de um usuário e início da sessão de outro usuário, usando a mesma conta).
 
 % Por que é importante identificar com a máxima precisão possível essas sessões? 
 
@@ -122,7 +110,7 @@ On \cite{Jiang:2018:IUB:3209978.3210054} its main goal is identifying shared acc
 The proposed work consists in two global objectives: (i) Verifying the possibility of an algorithm for session identification based on item category instead of timeout, 
 (ii) Create an evaluation method for reliably testing its accuracy and precision.
 
-globo.com dataset offered a good amount of data, it was preferred instead of others, but since they do not allow the use of news content, the [article] made available embeddings, corresponding in 250 dimensions from more than 300,000 articles. A dimensionality reduction technique was needed in order to reduce complexity of data and apply Affinity Propagation algorithm,
+globo.com dataset offered a good amount of data, it was preferred instead of others, but since they do not allow the use of news content, the [article] made available its embeddings that carries 250 dimensions of features from more than 300,000 articles. A dimensionality reduction technique was needed in order to reduce complexity of data and apply the \(Affinity Propagation\) clustering algorithm,
 
 The image below describes in general terms the pipeline of both proposals
 
@@ -130,13 +118,13 @@ The image below describes in general terms the pipeline of both proposals
     \centering
     \includegraphics[width=0.9\textwidth]{images/experiment.png}
     \caption{Proposed validation method}
-    \label{fig:my_label}
+    \label{fig:method_architecture}
 \end{figure}
 
 The dataset of choice in order to test its techniques was  \textit{globo.com dataset} from \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331} 
 that aggregates streams of user clicks with more than 2.8 millions of clicks.
 
-
+%TODO Deve ser atualizado
 On chapter 3 the concepts, history and motivation of choice on used algorithms are presented. Chapter 4 presents the problem and the solution definition.
 At the Fifth chapter, experimentation is revealed as its used tools, metrics are applied in order to measure accuracy and reliability of the proposed techniques.
 
@@ -148,7 +136,7 @@ On this chapter the foundations for this work will be introduced.
     \section{Basic concepts}
     At the current section it will be presented the basic building blocks, those are crucial to assemble the complete picture of this work, the concepts presented at its pipeline order are such as \(user\), \(account\), \(item\), \(session\) and \(recommendation\ systems\).
         
-        % TODO: explain each item
+        % TODO explain each item
         % User and Account
         Account is the common gateway for an user to access the platform content, most of past works consider that each account is in fact one user which may happen on most scenarios because normally each user has its own account, but sometimes and even more on paid platforms, an account is shared between more users.
     
@@ -296,7 +284,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
                 \centering
                 \includegraphics[width=0.8\textwidth]{images/tsne_clusters.png}
                 \caption{TSNE plot}
-                \label{fig:my_label}
+                \label{fig:tsne_plot}
             \end{figure}
         
         \subsection{Clustering with Affinity propagation}
@@ -309,14 +297,14 @@ At the current chapter, problem definition, algorithms, tools used for the propo
                 \centering
                 \includegraphics[width=0.8\textwidth]{images/affinity_plot.png}
                 \caption{Affinity propagation and each news relating to its cluster}
-                \label{fig:my_label}
+                \label{fig:affinity_propagation_clusters}
             \end{figure}
             
             \begin{figure}
                 \centering
                 \includegraphics[width=0.8\textwidth]{images/tsne_clusters_plot.png}
                 \caption{Affinity propagation topic clusters}
-                \label{fig:my_label}
+                \label{fig:affinity_propagation_centers}
             \end{figure}    
     
         \subsection{Matrix Factorization}
@@ -358,7 +346,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
                 \hline
             \end{tabular}
             \caption{TSNE coordinate results}
-            \label{tab:my_label}
+            \label{tab:tsne_results}
         \end{table}
         
         \subsection{Applying Clustering}
@@ -371,7 +359,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
             \centering
             \includegraphics{images/frequencies.png}
             \caption{Topic frequencies from a sampled user}
-            \label{fig:my_label}
+            \label{fig:topic_frequency}
         \end{figure}
         
     
@@ -391,7 +379,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
                 \hline
                 \end{tabular}
             \caption{Labeled cluster centers}
-            \label{tab:my_label}
+            \label{tab:labeled_clusters}
         \end{table}
 
 % =======================================================================
@@ -432,7 +420,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
             \hline
         \end{tabular}
         \caption{Globo dataset sample as Dataframe}
-        \label{tab:my_label}
+        \label{tab:globo_dataset_sample}
     \end{table}
 
     \section{Euclidean Distance as threshold}
@@ -473,18 +461,20 @@ At the current chapter, problem definition, algorithms, tools used for the propo
                     \hline
                 \end{tabular}
                 \caption{Desired cutoff example gray-colored by error}
-                \label{tab:my_label}
+                \label{tab:cutoff_table}
             \end{table}
             
             So in this example, the index 3 is the perfect cutoff, representing the real threshold between the two sessions, the picked index by the cutoff heuristic, will receive the respective error from its index row.
         \end{itemize} 
         
+        % TODO subseção com apenas 1 parágrafo
         \subsection{Affinity propagation parameters variation}
         The damping parameter was fixed at 0.9,
         15 cutoff values were tested between values 1 and 60, linearly spaced for each iteration with a different cutoff, 
         The output was a vector of error values of the same size of the simulated sessions(one for each session, about 32 thousand sessions).
         Then, from this error vector, it was calculated its mean and standard deviation for each iteration (15 iterations), so that we could measure its reliability and precision.
         
+        % TODO subseção com apenas 1 parágrafo
         \subsection{Sessions simulation}
         Because the dataset already have user ids in each row, it was considered that the majority of accounts were in fact from individual users, in that case, the hypothesis is that even if some users really shared the same account, this would be statistically irrelevant when analyzing the whole dataset.
         Considering that scenario true, the simulated sessions is constructed as a concatenation of two streams of two separated user ids.
@@ -514,7 +504,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
                 \hline
             \end{tabular}
             \caption{Simulated session sample}
-            \label{tab:my_label}
+            \label{tab:session_simulation}
         \end{table}
         
         \begin{table}[!ht]
@@ -541,16 +531,16 @@ At the current chapter, problem definition, algorithms, tools used for the propo
                 \hline
             \end{tabular}
             \caption{Cutoff testing}
-            \label{tab:my_label}
+            \label{tab:cutoff_sample}
         \end{table}
         
+        % TODO subseção com apenas 1 parágrafo
         \subsection{Distance calculation}
-        
         It represents how different two topics are.
         In a session dataframe, it is the euclidean distance between the cluster centroid coordinates from the current index N, with the coordinates from the centroid of the N-1 index. 
         
+        % TODO subseção com apenas 1 parágrafo
         \subsection{Cutoff criteria}
-    
         It is used a arbitrary threshold as cutoff, when the metric (distance or ALS prediction) is found above this threshold, it is considered a different session from a different user   
         
         \begin{table}[!ht]
@@ -567,7 +557,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
                 \hline
             \end{tabular}
             \caption{Labeled article coordinates}
-            \label{tab:my_label}
+            \label{tab:article_coordinates_table}
         \end{table}
         
         \newpage 
@@ -589,7 +579,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
             \centering
             \includegraphics{images/error_mean.png}
             \caption{Error mean heatmap}
-            \label{fig:my_label}
+            \label{fig:error_mean_heatmap}
         \end{figure}
         \par
         
@@ -597,7 +587,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
             \centering
             \includegraphics{images/error_std.png}
             \caption{Error standard deviation heatmap}
-            \label{fig:my_label}
+            \label{fig:error_std_heatmap}
         \end{figure}
         
         \newpage 
@@ -612,8 +602,8 @@ At the current chapter, problem definition, algorithms, tools used for the propo
         
         \newpage 
         
+        % TODO subseção com apenas 1 parágrafo
         \subsection{Error Metrics}
-
         The following table was created as result:
         \begin{table}[!ht]
             \centering
@@ -656,7 +646,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
                 \hline
             \end{tabular}
             \caption{Alternate Least Squares measurements}
-            \label{tab:my_label}
+            \label{tab:alternate_least_squares_metrics}
         \end{table}
         It was extracted metrics from 413 users
 
@@ -669,7 +659,7 @@ Another possible cause could be the dimensionality reduction step, no other algo
 
 Finally, news as a type of media have a chaotic nature, even when readers have his preference for certain topics, unexpected and relevant news from other topics may arrive and catch the readers eyes those phenomena, maybe they are common and can hinder this method of session cut by euclidean distance threshold. 
 
-\bibliographystyle{abntex2-alf}
+\bibliographystyle{packages/abntex2-alf}
 \bibliography{biblio}
 
 \end{document}

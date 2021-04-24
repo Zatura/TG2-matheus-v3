@@ -27,9 +27,8 @@
 \RequirePackage[brazilian]{babel}
 \RequirePackage{graphicx}
     \RequirePackage{keyval}
-\RequirePackage{fixltx2e}
 \RequirePackage{epstopdf}
-\RequirePackage{iidefs}
+\RequirePackage{packages/iidefs}
 
 %
 % definicoes padrao

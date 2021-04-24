@@ -77,18 +77,17 @@
 
 \RequirePackage{xspace}
 \RequirePackage{keyval}
-\RequirePackage{fixltx2e}
 
 \RequirePackage[english,brazilian]{babel}
-\input{brazilian.babel}
-\input{english.babel}
+\input{languages/brazilian.babel}
+\input{languages/english.babel}
 \if@english
         \selectlanguage{english}
         \AtBeginDocument{\selectlanguage{english}}
 \fi
 \RequirePackage{lastpage}
 \RequirePackage{indentfirst}
-\RequirePackage{iidefs}
+\RequirePackage{packages/iidefs}
 \RequirePackage{setspace}
 \RequirePackage{ccaption}
 \RequirePackage{titlesec}
