@@ -53,14 +53,13 @@
 
 
 \begin{abstract}
-  Although some content providers register stream data from its users and can track their profile styling for content recommendation intentions, when two or more users share a same account, their true profile activity is obfuscated and fuzzed, this user behavior hinders the recommendation systems from providers. 
-  This work proposes a way of classifying users' stream data trough sessions based on its media content, opening the possibility for breaking a same account with multiple user profiles and consequently identifying this activity. In this work dimensionality reduction and clustering methods are used to classify user stream data into sessions that correspond to each respective user profile.
+  Although some content providers register stream data from its users and can track their profile style for content recommendation, when two or more users share a same account, their true profile activity is obfuscated and fuzzed, this user behavior hinders the recommendation systems from providers. This work proposes a way of classifying users' stream data trough sessions based on its media content, opening the possibility for breaking a same account profile within multiple user profiles and consequently identifying this activity. In this work dimensionality reduction and clustering methods are used to classify user stream data into sessions that correspond to each respective user profile.
 \end{abstract}
 
 % resumo em português
 \begin{englishabstract}{}{Redução de dimensionalidade, Clusterização, Perfis de usuários, Identificação de sessões, Sistemas de recomendações}
 
-  Embora as provedoras de conteúdos registram dados de acessos de seus usuários e consigam analisar seus perfis para fazer recomendações de conteúdo, quando duas ou mais pessoas compartilham da mesma conta a atividade e perfil original e individual de cada usuário é obfuscada e difusa por essas contas compartilhadas, este comportamento confunde os sistemas de recomendação existentes. 
+  Embora as provedoras de conteúdos registram dados de acessos de seus usuários e consigam analisar seus perfis para recomendações de conteúdo, quando duas ou mais pessoas compartilham da mesma conta a atividade e perfil original e individual de cada usuário é obfuscada e difusa por essas contas compartilhadas, este comportamento confunde os sistemas de recomendação existentes. 
   Este trabalho propõe uma maneira de classificar o fluxo de dados dos usuários em sessões baseando-se em seu conteúdo, abrindo portas para quebrar a mesma conta em múltiplos perfis de usuários e consequentemente identificando esta atividade. Neste trabalho Redução de dimensionalidade e métodos de clusterização são utilizados para classificar o fluxo de dados em sessões que correspondem respectivamente a cada perfil de usuário.
 \end{englishabstract}
 
@@ -69,7 +68,7 @@
 
 \begin{listofabbrv}{SPMD}
     \item[PCA] Principal Component Analysis
-    \item[TSNE] T-Distributed Stochastic Network
+    \item[tSNE] t-Distributed Stochastic Network
     \item[ALS] Alternate Least Squares
     \item[RNN] Recurrent Neural Networks
 \end{listofabbrv}
@@ -78,6 +77,7 @@
 
 % =======================================================================
 
+%TODO No final da introdução fazer um paragrafo explicando brevemente cada capítulo.-7  
 \chapter{Introduction}
 Most platforms nowadays rely on recommendation systems to create plug and play interactions between users and offered items, avoiding search time and making platform navigation minimal and crisp, however, some user behaviours or even the emerging privacy laws and growing concerns on data privacy, recommendation systems precision can get affected by profiling contamination on the user-item relations  and its interpretation by the system.
 
@@ -86,6 +86,10 @@ One commonly known example responsible for grinding the recommendation systems p
 This problem is evident on commonly used time-based session identification techniques such as \cite{10.1145/2736277.2741117}, the presented scenario would fail in identifying sessions, if chosen period threshold for breaking sessions is long enough, the elapsed time from user permutation usage on platform could be insignificant on the total session time, thus preserving the unity of the session, but in reality two completely sessions have happened during this period.
 
 On \cite{Jiang:2018:IUB:3209978.3210054} its main goal is identifying shared accounts in multimedia streaming and it addresses a clearly domain separation between \textit{account-level recommendation} and \textit{user-level recommendation}, but even so, they use a timeout along with their other techniques to break the session.
+
+\cite{DBLP:journals/corr/ZhangFIM14}
+\cite{10.1145/2792838.2800170}
+
 
 % Por que é importante identificar com a máxima precisão possível essas sessões? 
 
@@ -131,16 +135,24 @@ At the Fifth chapter, experimentation is revealed as its used tools, metrics are
 % =======================================================================
 
 \chapter{Theoretical Background and Related Work}
-On this chapter the foundations for this work will be introduced.
+On this chapter the foundations will be introduced as well as related works, those are crucial to assemble the complete picture of this work.
+
 
     \section{Basic concepts}
-    At the current section it will be presented the basic building blocks, those are crucial to assemble the complete picture of this work, the concepts presented at its pipeline order are such as \(user\), \(account\), \(item\), \(session\) and \(recommendation\ systems\).
-        
         % TODO explain each item
+        
+        \begin{itemize}
+            \item \(User\) is the person itself that is using the platform trough an account, most of times each user has its own account, but at sometimes, one account can have multiple users.        
+            \item \(Account\) is a platform gateway and record that contains user detailed information and is used to register user history associating each requested item with its requester account id.
+            \item \(Item\) represents the consumed media, can be music, image, video or text in case of a news article.
+            \item \(Clickstream\) is a group of requested items ordered by request timestamp.    
+            \item \(Session\) is a subset of a stream, the beginning and end of a session can be marked considering user idleness, where the time difference between one requested item and the next one is higher than a certain threshold.
+        \end{itemize}
+
         % User and Account
         Account is the common gateway for an user to access the platform content, most of past works consider that each account is in fact one user which may happen on most scenarios because normally each user has its own account, but sometimes and even more on paid platforms, an account is shared between more users.
     
-        % Item and Session
+        % Item and Session        
         An item is a pair with a click timestamp and a media id identification. 
         At Globo dataset, each item is a  set \((timestamp, click\_id)\) but 
         in any other dataset, the click id is a reference to news, music, 
@@ -152,6 +164,7 @@ On this chapter the foundations for this work will be introduced.
         considered an end of a session and start of another. In this proposal the 
         sessions will be split considering the content type in order to identify 
         account sharing or even user profiling for different user tastes.
+
 
     \section{Basic methods}
     Here the methods for manipulating the just presented basic blocks will be briefly described, such as \(recommendation\ system\), \(dimensionality\ reduction\) and \(clustering\).
@@ -169,15 +182,18 @@ On this chapter the foundations for this work will be introduced.
         \textit{Implicit vs Explicit} definitions correspond to the way data is semantically related between the pair \(account\)-\(item\). On \(Implicit\) recommendation systems there is an implicit relationship between the used item and the expectation that the majority of those items are desirable by its user, on the other side of the spectrum, there are the \(Explicit\) recommendation systems that usually uses a rate system given by the \(user\), so there is not just a simple link between both entities, but also a subjective magnitude that could be either positive or negative, qualitatively speaking.
 
         \textit{Content-based vs Collaborative} classifies on an \(account\)-\(account\) relationship. On the first one the similarity between interacted items on a same account is used to retrieve similar new items that the user didn't yet explored, on the second one, the comparison is based upon other accounts that share similarity, so items from these accounts that are missing on the interaction history can be recommended. On state of art systems, both methods are combined in order to get the best results.    
-
+        
+        % TODO subseção com apenas 1 parágrafo
         \subsection{Dimensionality reduction}
         The more dimensions a dataset has the more diluted the statistical significance becomes, 
-        because data sparsity grows exponentially as the dimensions grow linearly, 
-        this phenomena is called \textit{the curse of dimensionality} and is described on \cite{10.1093/imamat/24.1.59} and one on way to finding statistical significance are techniques of \textit{dimensionality reduction}.
-        One of firsts successful algorithms is called \textit{Principal Component Analysis}, 
-        its model was developed in 1933 by \cite{hotelling:33} and it consists in finding linear combinations between pair of dimensions that corresponds to most statistical significance trough standard deviation metrics, where the two most significant linear combinations becomes the main dimensions and its points are plotted in a two dimensional Cartesian plane.
-        Those techniques are used before applying Clustering algorithms, because normally media contents are described as an array of multidimensional features. 
+        because data sparsity grows exponentially as the dimensions grow linearly,  
+        this phenomena is called \textit{the curse of dimensionality} and is described on \cite{10.1093/imamat/24.1.59} and one on way to finding statistical significance are techniques of \textit{dimensionality reduction}, further discussions and solutions are discussed on \ref{data_scarcity_and_sparcity}.
         
+        One of firsts successful algorithms is called \textit{Principal Component Analysis}, 
+        its model was developed in 1933 by \cite{hotelling:33} and it consists in finding linear combinations between pair of dimensions that corresponds to most statistical significance trough variance, where the two most significant linear combinations becomes the main dimensions and its points are plotted in a two dimensional Cartesian plane.
+        Dimensionality reduction techniques are used before applying Clustering algorithms, because normally media contents are described as an array of multidimensional features.
+        
+        % TODO subseção com apenas 1 parágrafo
         \subsection{Cluster analysis}
         It is the method for grouping items that share a vicinity/similarity and then labelling each one of the groups, normally, clustering algorithms are applied on points plotted on two-dimensional planes. There are many types of algorithms for classifying clusters, such as \textit{distribution-based}, \textit{density-based}, \textit{centroid-based}, \textit{connectivity-based} and others. In this work the centroid-based algorithm \(Affinity\ propagation\) was used for classifying clusters of similar \(items\), in this case each \(item\) represented by one news content.
 
@@ -185,15 +201,17 @@ On this chapter the foundations for this work will be introduced.
 % More related works
 \section{Related works}
 % This chapter will present previous works that used user identification and sessionization as solution, both profile-level and time-level methodologies.
-        
-    \subsection{Time-level user identification}
-    The work \cite{10.1145/2736277.2741117} consists in monitoring different domains of online activity browsing (Games, search engines, page views), thus achieving session identification using a fixed 30 minutes inactivity threshold as session identification, authors demonstrates high regularity between different sessions from a same user. 
-    Since they do not address account sharing, there is a chance that threshold based on item usage or user behaviour and not on time usage, would have more impact on identifying sessions related to different users.
-    On \cite{JINDAL2020} et al, they propose a dynamic threshold heuristic based on user behaviour history, their discoveries show that short time user navigation are more often and less correlated than longer ones, making them easier to categorize and achieving a higher accuracy. However, this method apply a threshold into the user behaviour pattern, and differently, this work relies on the distance between topics inside a session, also the proposed method uses fixed threshold for simplicity reasons.
+    
+The work \cite{10.1145/2736277.2741117} consists in monitoring different domains of online activity browsing (Games, search engines, page views), thus achieving session identification using a fixed 30 minutes inactivity threshold as session identification, authors demonstrates high regularity between different sessions from a same user. 
+Since they do not address account sharing, there is a chance that threshold based on item usage or user behaviour and not on time usage, would have more impact on identifying sessions related to different users.
+On \cite{JINDAL2020} et al, they propose a dynamic threshold heuristic based on user behaviour history, their discoveries show that short time user navigation are more often and less correlated than longer ones, making them easier to categorize and achieving a higher accuracy. However, this method apply a threshold into the user behaviour pattern, and differently, this work relies on the distance between topics inside a session, also the proposed method uses fixed threshold for simplicity reasons.
 
-    \subsection{Profile-level user identification}
-    One of the state of art contribution is from \cite{Jiang:2018:IUB:3209978.3210054} that using the \textit{LastFM} and \textit{KKBOX} datasets, they address a solution on user identification on shared accounts at streaming platforms given its history logs, proposing the novel unsupervised learning named SHE-UI. They could be able to identify groups of users sharing a same account, bringing their solution to an user-level recommendation domain instead of account-level.
-    A problem that e-commerce recommendation systems face is when an advertisement of an exact size or individual characteristic for an user is required, because other users may end up contaminating the account history and spoiling the estimate of these unique attributes or sizes, on \cite{10.1145/3178876.3186149} et al the problem is discussed using Amazon.com e-commerce, instead of dealing with each account as a specific user and single profile, they propose a multi-persona approach boosting the accuracy, however, this method does not work well on products that have a high variability on its characteristics.
+One of the state of art contribution is from \cite{Jiang:2018:IUB:3209978.3210054} that using the \textit{LastFM} and \textit{KKBOX} datasets, they address a solution on user identification on shared accounts at streaming platforms given its history logs, proposing the novel unsupervised learning named SHE-UI. They could be able to identify groups of users sharing a same account, bringing their solution to an user-level recommendation domain instead of account-level.
+A problem that e-commerce recommendation systems face is when an advertisement of an exact size or individual characteristic for an user is required, because other users may end up contaminating the account history and spoiling the estimate of these unique attributes or sizes, on \cite{10.1145/3178876.3186149} et al the problem is discussed using Amazon.com e-commerce, instead of dealing with each account as a specific user and single profile, they propose a multi-persona approach boosting the accuracy, however, this method does not work well on products that have a high variability on its characteristics.
+
+\cite{DBLP:journals/corr/ZhangFIM14}
+\cite{10.1145/2792838.2800170}
+
 
 % Aqui tá faltando trabalho relacionado.
 % =======================================================================
@@ -224,105 +242,80 @@ At the current chapter, problem definition, algorithms, tools used for the propo
         
         Time-based sessions are the most commonly used as consensus as a method for example at \cite{10.1145/3184558.3191582} it is used a defined session trough a fixed time, but the way they make it flexible, were by using a decaying time-based weight into the session items, they used this approach to overcome the short life-span of news. At the proposed method, since not the news itself, but it's topic, the short life-span problem wasn't expected to be relevant enough.
     
-        \subsection{Cold start problem}
-        This is a flaw of content-based recommendation systems, since it is content-centric, when an user is fresh having little or no content history, the method lacks on precision. 
+        \subsection{Data scarcity and sparcity} \label{data_scarcity_and_sparcity}
+        \textbf{Cold start problem.} This flaw is addressed mostly to \textit{content-based} recommendation systems, since it is content-centric, when an user is fresh and he has little or no content history, the method lacks on precision resulting on spurious extrapolations.
     
         A Collaborative system, is no different in terms of this flaw, but it is more resistant, since it collaboratively uses content history from other users, it can fill the gap against data scarcity from fresh users.
         
+        % TODO refazer o primeiro método com 200 items também.
         In order to avoid this dilemma, the proposed metrics are based on previously filtered sessions, where the first method use sessions with more than 10 items, and the second method, more than 200 items.
     
-        % Matheus: Necessário? na introdução este problema é brevemente descrito e seu autor citado é o motivo do uso de um algoritmo como o TSNE.
-        \subsection{Curse of dimensionality Problem}
-        Because content analysis and classification requires a complex analysis that generates great amounts of features/dimensions, the curse of dimensionality is very relevant as a problem, any media should be translated into a multi dimensional space before the classification.
-        
-        A successful and recent example of PCA use is on the physical simulation from a 3D engine at \cite{10.1145/3309486.3340245}. Before a complex process of vector computation for physics simulation, PCA was used to minimise the information-trash creating a meaningful and denser subspace in terms of information relevance before training a neural network, making the algorithm 10X faster and using less memory.
+        % Matheus: Necessário? na introdução este problema é brevemente descrito e seu autor citado é o motivo do uso de um algoritmo como o tSNE.
+        \textbf{Curse of dimensionality Problem.} Since content analysis and classification requires a complex analysis that generates great amounts of features/dimensions and usually recommendation systems data are sparse, the curse of dimensionality \cite{10.1093/imamat/24.1.59} is very relevant as a problem, any media should be translated into a multi dimensional space before the classification.
 
         
-    \section{Algorithms and Datasets}
+    \section{Algorithms}
     
     On this section, all the datasets and used algorithms will be described as well as it historic evolution against their pioneers.
+        
+    \textbf{Principal Component Analysis} \cite{hotelling:33}  is the first known form of dimensionality reduction for multidimensional data. The pinnacle of the technique is mapping from all dimensions two linear combinations which have the biggest statistical significance, or in other terms, mapping on two dimensions which have maximized variance between all others.
     
-        % O objetivo desse capítulo é apresentar os conceitos e algoritmos necessários para a construção da metodologia de avaliação....
-        
-        % Iniciar todos os capítulos com uma descrição do que é o conteúdo do capítulo. Por exemplo, nesse capítulo serão apresentados os conceitos e recursos que irão compor a metodologia de avaliação da eficácia e eficiência das técnicas para separação das sessões online de usuários. A seção organiza a discussão dos conceitos e recursos entre aqueles que foram usados no trabalho e aqueles que não foram usados. Em ambos os casos, será feita uma discussão sobre as potencialidades do conceito, no caso em que são usados, ou das limitações que impedem a aplicação dos mesmos, nos casos em que não são utilizados.
-        
-        % Possível organizaçao das seções:
-        % 3.1. Caracterização do Traço do Globo.com
-        % Quantos registros eles tem, quantos usuários, qual o tamanho, qual o período que eles refletem, qual a natureza deles, quais os campos que cada entrada possui... 
-        
-        % 3.2. Técnicas Utilizadas
-        % 3.3. Técnicas Não Utilizadas
+    If you have \(n\) dimensions and \(m\) items where each item has its own coordinate, PCA would translate this \(m \times n\) space matrix into another rotated \(m \times n\) matrix trough linear operations into each dimension, those new translated dimensions are called \textit{principal components}.
+    Their rotation is in fact a linear combination between two original dimensions which have its variance maximized using \textit{Least Squares Regression}.
     
-        % Matheus: Sinto que preciso reduzir este texto, visto que não usei PCA e ele tem valor apenas explicativo
-        \subsection{Principal Component Analysis} 
-        Principal Component Analysis is the first known form of dimensionality reduction on multidimensional data.
-        Its model was developed in 1933 by \cite{hotelling:33} and the main idea of its technique is finding linear combinations from pairs of dimensions that corresponds to most statistical significance trough standard deviation metrics in each one.
-        So, imagine you have N dimensions and M items with its coordinate in this space, PCA would translate this N-space matrix into another N-space matrix trough rotations on those dimensions, based on standard deviation metrics finding the biggest deviation in each linear combination. 
+    The \textit{principal components} end up ordered based on their variance from its span, they are the eigen vectors positioned on the diagonal of the resulting matrix and the rank of \textit{principal components} based on its variance is called \textit{scree-plot}.
 
-        Since each linear combination is a pair of dimensions, the best angular coefficients to represent the new rotated dimensions are calculated using Least Squares Regression, fitting the points in this two dimensional sample relation, making the the line span represents a new dimension with the biggest standard deviation possible, meaning a better statistical significance.
-        After this process, a rank of standard deviations called \textit{scree-plot} is made trough all those new rotated dimensions, and the two most significant dimensions, with bigger deviations, will better represent the data in a 2-dimensional Cartesian fashion.
-
-        In Fact, the diagonal of the resulting matrix of the whole process is the variance of each dimension ordered by statistical significance and it is the \textit{scree-plot}.
-
-        However, this is the naive approach in data dimensionality reduction, but it is very useful when data have information linked trough linear relations.
-        A successful and recent example of PCA use is this physical engine in \cite{10.1145/3309486.3340245}, that before a complex process of vector computation for physics simulation, a PCA was used to reduce the "information-garbage" creating a meaningful and denser subspace in terms of relevant information before training a neural network, making the algorithm 10X faster using less memory.
-        
-        In the example of globo dataset, as \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331} mentions, they could not provide the globo news content, since it is closed source, however, they mention in their article also, that TSNE would represent a better representation of the reduced data, since this matrix have non-euclidean information relationships, so in that case, PCA would not fit the best 2-dimensional surface in terms of statistical significance.
-        To think what would happen using a excessively linear algorithm like PCA to find the best surface, imagine a zig-zagged bent bread and you want to cut the middle of it with a knife, PCA would make a straight line cut ignoring the format of the bread. In that case, the algorithm they recommend is TSNE, a modern and state-of-art technique for dimensional reduction that uses machine learning and gradient descend techniques.
-        \newline
-        
-        \subsection{TSNE, a state-of-art dimensionality reduction}
-        As any other algorithm for this purpose, it maps highly dimensional data into a low dimensional representation resuming the data and resisting against dimensionality curse as mentioned \cite{10.1093/imamat/24.1.59}, but differently from PCA, TSNE is a non-linear method, proposed in 2008 by \cite{vanDerMaaten2008}, this method preserves local geometry and deform global geometry, more specifically, it tends to clump points that share a near neighborhood making the clusters more evident.
-        Non-linear means that if you have highly dimensional data that has a geometric representation of a curvy non-convex surface of points, for example, PCA due to its linearity would make a straight cut into this curve finding straight planes and never really fitting into the curvy surface, PCA has its algorithms variances that reduce its problems, like the Kernel PCA, but TSNE is considered to be the state-of-art for reasons below.
-
-        TSNE It is a sequel of SNE (Stochastic Neighborhood embedding), but because the current distribution from SNE not only hardly clump the points close to each other but it is use to be computationally slow, because of the use of exponentiation when calculating the distribution equation.
-        The "T" letter stands for T-student distribution, it is computationally faster and has a less severe penalty on point agglutination due to its natural flattened curve, thus winning the "state-of-art" title due to its low cost and better precision.
-
-        On the figure below, there is the result of TSNE on Globo dataset highly dimensional embedding that represents the content of each news, this exactly plot and its data was used on the proposed method, each point represented below is a relationship of a Xs, Ys coordinate with an article id 
-        \par
-            \begin{figure}
-                \centering
-                \includegraphics[width=0.8\textwidth]{images/tsne_clusters.png}
-                \caption{TSNE plot}
-                \label{fig:tsne_plot}
-            \end{figure}
-        
-        \subsection{Clustering with Affinity propagation}
-
-        The advantage of affinity propagation between other algorithms is that it does not need to specify an estimate of quantity of points found into the space, it naturally walks trough the points and finds the resulting clusters.
-
-        On the image below there is the visualization of the discovered clusters on the low dimensional embedding representation from TSNE result, and on the second image, the center of each cluster representing a topic, that later should be used to calculate the semantic difference from each topic based on the euclidean distance from the pair of topics being compared.
-         
-            \begin{figure}
-                \centering
-                \includegraphics[width=0.8\textwidth]{images/affinity_plot.png}
-                \caption{Affinity propagation and each news relating to its cluster}
-                \label{fig:affinity_propagation_clusters}
-            \end{figure}
-            
-            \begin{figure}
-                \centering
-                \includegraphics[width=0.8\textwidth]{images/tsne_clusters_plot.png}
-                \caption{Affinity propagation topic clusters}
-                \label{fig:affinity_propagation_centers}
-            \end{figure}    
+    However, \textit{Principal component analysis} is the naive approach for data dimensionality reduction, but it is very useful when data have information linked trough linear relationships.
+    A successful and recent example of PCA use is this physical engine in \cite{10.1145/3309486.3340245}, that before a complex process of vector computation for physics simulation, a PCA was used to reduce the statistical irrelevance creating a meaningful and denser subspace in terms of significant information before training a neural network, making the algorithm 10X faster and using less memory.
     
-        \subsection{Matrix Factorization}
-        Netflix is known for it's competitions for collaborative filters algorithms and in 2008 one algorithm called matrix factorization  achieve a huge breakthrough in collaborative filtering algorithms, and it is like the prime factors for grown ups, or in other words, using matrices as factors instead of prime numbers, it is a useful mechanism to separate the users-items matrix into a items matrix and a user matrix, that their multiplication result in the original \(users-items\) matrix, results into Item X User original association matrix that each item is the relation of one user to a single item.
-        The usefulness of this factorization, is that since the original matrix is sparse, because not every user in its history has real relation with every item, you can fill the missing values by making inferences on the factorized data.
-        An optimal way of doing so is by using the Alternate Least Squares algorithm explained below that uses Gradient Descent as convergence algorithm.
-        
-        \subsection{Alternate Least Squares}
-        Alternate Least Squares, is a faster variant of the Matrix Factorization that allows it to be computational distributed, the as matrix factorization, it has SVD as central role on the factorization between item and user matrices, but in this case, a cost function with an error function is alternated between each matrix, updating the elements of one matrix at a time, this computational behaviour reduces the complexity of the cost function and allows it to be computed in a distributed fashion.
-        Today a common implementation of ALS is from Spark \(Hadoop\) in java, but also have facade libraries that allow calling ALS from spark \(Hadoop\) from other languages like Scala and Python (Pyspark).
+    At Globo dataset, as \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331} mentions, they could not provide the news content due to its closed source policy, however, they released a matrix of features where each news was represented by an array of 255 features, also they mention in their article that tSNE would translate to a better representation of the reduced data, since this matrix have non-euclidean information relationships, so in that case, PCA would not fit the best 2-dimensional surface in terms of statistical significance.
+    % Estou pensando em remover esta explicação abaixo
+    To think what would happen using a excessively linear algorithm like PCA to find the best surface, imagine a zig-zagged bent bread and you want to cut the middle of it with a knife, PCA would make a straight line cut ignoring the format of the bread. In that case, the algorithm they recommend is tSNE, a modern and state-of-art technique for dimensional reduction that uses machine learning and gradient descend techniques.
+    
+    % \subsection{tSNE, a state-of-art dimensionality reduction}
+    \textbf{tSNE (t-distributed stochastic neighbor embedding)} also maps highly dimensional data into a low dimensional representation resuming the data and resisting against dimensionality curse as mentioned \cite{10.1093/imamat/24.1.59}, but differently from PCA, tSNE \cite{vanDerMaaten2008} is a non-linear method, this method preserves local geometry and deform global geometry, more specifically, it tends to clump points that share a near neighborhood making the clusters more evident.
+    Non-linear means that if you have highly dimensional data that has a geometric representation of a curvy non-convex surface of points, for example, PCA due to its linearity would make a straight cut into this curve finding straight planes and never really fitting into the curvy surface, PCA has its algorithms variances that reduce its problems, like the Kernel PCA, but tSNE is considered to be the state-of-art for reasons below.
+
+    tSNE It is a sequel of SNE (Stochastic Neighborhood embedding), but because the current distribution from SNE not only hardly clump the points close to each other but it is use to be computationally slow, because of the use of exponentiation when calculating the distribution equation.
+    % TODO place t-stuent formula, compare the speed against gaussian computation
+    The "t" letter stands for t-student distribution, it is computationally faster and has a less severe penalty on point agglutination due to its natural flattened curve, thus winning the "state-of-art" title due to its low cost and better precision.
+
+    On figure \ref{fig:tsne_plot} there is a plot of tSNE applied on Globo dataset highly dimensional embedding that represents the content of each news, this exactly plot and its data was used on the proposed method, each point represented below is a relationship of a Xs, Ys coordinate with an article id 
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{images/tsne_clusters.png}
+        \caption{tSNE plot}
+        \label{fig:tsne_plot}
+    \end{figure}
+
+    \textbf{Affinity propagation.} The advantage of affinity propagation between other algorithms is that it does not need to specify an estimate of quantity of points found into the space, it naturally walks trough the points and finds the resulting clusters.
+
+    On figure \ref{fig:affinity_twins} there is the visualization of the discovered clusters on the low dimensional embedding representation from tSNE result of globo dataset, the second image shows the center from each topic cluster, that later should be used to calculate the semantic difference from each topic based on the euclidean distance from the pair of topics being compared.
+     
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{images/affinity_twins.png}
+        \caption{Affinity propagation clusters(left) and its centers(right)}
+        \label{fig:affinity_twins}
+    \end{figure}
+    
+    % TODO \cite{10.5555/1087620} <- phd thesis do matrix factorization
+    % \subsection{}
+    \textbf{Matrix Factorization.} Netflix is known for it's competitions for collaborative filters algorithms, in 2008 \textit{matrix factorization} \cite{10.5555/1087620} was used and achieved a huge breakthrough in collaborative filtering algorithms, and it is like the prime factors for grown ups, using matrices as factors instead of just scalar numbers, it is a useful mechanism to separate the users-items matrix into a items' matrix and a users' matrix, that their multiplication result in the original users-items matrix, results into Item X User original association matrix that each item is the relation of one user to a single item.
+    The usefulness of this factorization, is that since the original matrix is sparse, you can fill the missing values by making inferences on the factorized data, because not every user in its history has real relationship with every item.
+    An optimal way of doing so is by using the \textit{Alternate Least Squares} algorithm explained below that uses  \textit{Gradient Descent} as convergence algorithm.
+    
+    
+    \textbf{Alternate Least Squares.} It is a faster variant of the Matrix Factorization that allows it to be computational distributed, the as matrix factorization, it has SVD as central role on the factorization between item and user matrices, but in this case, a cost function with an error function is alternated between each matrix, updating the elements of one matrix at a time, this computational behaviour reduces the complexity of the cost function and allows it to be computed in a distributed fashion.
+    Today a common implementation of ALS is from Spark \(Hadoop\) in java, but also have facade libraries that allow calling ALS from spark \(Hadoop\) from other languages like Scala and Python (Pyspark).
 
     \section{Technology usage}
 
-        \subsection{Python and its libraries}
-        It was used \(Python3\) with \textit{pandas} \cite{reback2020pandas} and \textit{numpy} as main data manipulation, \(Pyspark\) was used for ALS method recommender system. 
-        \(Pyspark\) is a python library that is a facade for a java spark hadoop spark application server that uses map/reduce in order to make distributed computations.
-    
-        For TSNE and Affinity propagation \(sklearn\) library was the choice.
+    It was used \(Python3\) with \textit{pandas} \cite{reback2020pandas} and \textit{numpy} as main data manipulation, \(Pyspark\) was used for ALS method recommender system. 
+    \(Pyspark\) is a python library that is a facade for a java spark hadoop spark application server that uses map/reduce in order to make distributed computations.
+
+    For tSNE and Affinity propagation \(sklearn\) library was the choice.
         
         \subsection{Applying Dimensionality reduction}
         Because Globo news text data is closed source, \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331} made available the trained article embeddings data \footnote{https://www.kaggle.com/gspmoreira/news-portal-user-interactions-by-globocom} generated from its unique \textit{CHAMALEON} RNN-based algorithm. The embedding file consists into a matrix of 250 dimensions of features and 364,047 news articles, those features are a representation of the content for each respective news article.
@@ -330,7 +323,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
         On the proposed method only the following data and respective embedding were considered: \textit{click\_timestamp, article\_id} and \textit{{}user\_id}.
         
     
-        Since on their work TSNE was mentioned as a good method for dimensionality reduction, TSNE was applied on the embedding, resulting into a pair of coordinates X, Y for each article id as the dataframe sample below:
+        Since on their work tSNE was mentioned as a good method for dimensionality reduction, tSNE was applied on the embedding, resulting into a pair of coordinates X, Y for each article id as the dataframe sample below:
         
         \begin{table}[!ht]
             \centering
@@ -345,27 +338,25 @@ At the current chapter, problem definition, algorithms, tools used for the propo
                 ... & ... & ... \\
                 \hline
             \end{tabular}
-            \caption{TSNE coordinate results}
+            \caption{tSNE coordinate results}
             \label{tab:tsne_results}
         \end{table}
         
         \subsection{Applying Clustering}
-        At this step, \textit{Affinity propagation} is applied on the TSNE result data plane, several damping parameters were tested and presented further at the error metrics section. 
+        At this step, \textit{Affinity propagation} is applied on the tSNE result data plane, several damping parameters were tested and presented further at the error metrics section. 
         After the clustering, each cluster center point into the resulting plane receives a human-readable label, the image below shows a distribution of consumed topics by a sampled user resembling a 
         Benford's law distribution:
-        \newline
         
-        \begin{figure}[!ht]
+        \begin{figure}[H]
             \centering
             \includegraphics{images/frequencies.png}
             \caption{Topic frequencies from a sampled user}
             \label{fig:topic_frequency}
         \end{figure}
-        
     
         further, this data will be used into session items and used on both methods euclidean distance and ALS methods.
         
-        \begin{table}[!ht]
+        \begin{table}[H]
             \centering
                 \begin{tabular}{ |c|c|c| } 
                 \hline
@@ -388,6 +379,9 @@ At the current chapter, problem definition, algorithms, tools used for the propo
 
     Here there will be a comparison between \(euclidean\ distance\) threshold against \(alternate\ least\ square\) methods and its parameters variations.
 
+    % TODO como foi separado test data vs non-test data?
+    % TODO talvez seja interessante uma seção de performance(precision and recall) e limites do algoritmo (e do método de clusterização)
+    % TODO seção pode ser chamada apenas de Datasets
     \section{Globo.com dataset} %TODO contextualização disso nesse capítulo
     It is a collection that consists on the following:
     \begin{itemize}
@@ -575,22 +569,19 @@ At the current chapter, problem definition, algorithms, tools used for the propo
     
         In that case a low mean and a low std. is desired.
         
-        \begin{figure}[!ht]
+        \begin{figure}[H]
             \centering
             \includegraphics{images/error_mean.png}
             \caption{Error mean heatmap}
             \label{fig:error_mean_heatmap}
         \end{figure}
-        \par
         
-        \begin{figure}[!ht]
+        \begin{figure}[H]
             \centering
             \includegraphics{images/error_std.png}
             \caption{Error standard deviation heatmap}
             \label{fig:error_std_heatmap}
         \end{figure}
-        
-        \newpage 
     
     \section{Applying alternate least squares}
         \subsection{Method}
@@ -655,7 +646,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
 \chapter{Conclusion}
 The standard deviation presented on the heatmaps with different input parameters reveals that the euclidean distance as threshold method does not have enough precision, but these results could have many explanations for this lack of precision not only from the method itself. Since globo dataset is closed source and the features available from \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331} were created from his own algorithm, a certain level of belief was implied that the features really reflected its content and his algorithm worked well on quantitatively describing them.
 
-Another possible cause could be the dimensionality reduction step, no other algorithm was tested but the recommend TSNE from \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331}.
+Another possible cause could be the dimensionality reduction step, no other algorithm was tested but the recommend tSNE from \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331}.
 
 Finally, news as a type of media have a chaotic nature, even when readers have his preference for certain topics, unexpected and relevant news from other topics may arrive and catch the readers eyes those phenomena, maybe they are common and can hinder this method of session cut by euclidean distance threshold. 
 

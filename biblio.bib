@@ -174,6 +174,7 @@
   doi = {10.23915/distill.00002}
 }
 
+% TODO Revisar como se cita um software
 @software{reback2020pandas,
     author = {The pandas development team},
     title = {pandas-dev/pandas: Pandas},
@@ -220,6 +221,41 @@
     series = {WWW '18}
 }
 
+@inproceedings{10.1145/2792838.2800170,
+author = {Verstrepen, Koen and Goethals, Bart},
+title = {Top-N Recommendation for Shared Accounts},
+year = {2015},
+isbn = {9781450336925},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2792838.2800170},
+doi = {10.1145/2792838.2800170},
+abstract = {Standard collaborative filtering recommender systems assume that every account in the training data represents a single user. However, multiple users often share a single account. A typical example is a single shopping account for the whole family. Traditional recommender systems fail in this situation. If contextual information is available, context aware recommender systems are the state-of-the-art solution. Yet, often no contextual information is available. Therefore, we introduce the challenge of recommending to shared accounts in the absence of contextual information. We propose a solution to this challenge for all cases in which the reference recommender system is an item-based top-N collaborative filtering recommender system, generating recommendations based on binary, positive-only feedback. We experimentally show the advantages of our proposed solution for tackling the problems that arise from the existence of shared accounts on multiple datasets.},
+booktitle = {Proceedings of the 9th ACM Conference on Recommender Systems},
+pages = {59–66},
+numpages = {8},
+keywords = {nearest neighbors, collaborative filtering, recommender systems, shared account, explaining recommendations},
+location = {Vienna, Austria},
+series = {RecSys '15}
+}
+
+@article{DBLP:journals/corr/ZhangFIM14,
+  author    = {Amy Zhang and
+               Nadia Fawaz and
+               Stratis Ioannidis and
+               Andrea Montanari},
+  title     = {Guess Who Rated This Movie: Identifying Users Through Subspace Clustering},
+  journal   = {CoRR},
+  volume    = {abs/1408.2055},
+  year      = {2014},
+  url       = {http://arxiv.org/abs/1408.2055},
+  archivePrefix = {arXiv},
+  eprint    = {1408.2055},
+  timestamp = {Sat, 23 Jan 2021 01:12:28 +0100},
+  biburl    = {https://dblp.org/rec/journals/corr/ZhangFIM14.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
 @inproceedings{10.1145/362883.362920,
     author = {Arlitt, Martin},
     year = {2000},
@@ -229,4 +265,15 @@
     volume = {28},
     journal = {SIGMETRICS Performance Evaluation Review},
     doi = {10.1145/362883.362920}
+}
+
+@phdthesis{10.5555/1087620,
+    author = {Srebro, Nathan and Jaakkola, Tommi S.},
+    title = {Learning with Matrix Factorizations},
+    year = {2004},
+    publisher = {Massachusetts Institute of Technology},
+    address = {USA},
+    abstract = {Matrices that can be factored into a product of two simpler matrices can serve as a useful and often natural model in the analysis of tabulated or high-dimensional data. Models based on matrix factorization (Factor Analysis, PCA) have been extensively used in statistical analysis and machine learning for over a century, with many new formulations and models suggested in recent years (Latent Semantic Indexing, Aspect Models, Probabilistic PCA, Exponential PCA, Non-Negative Matrix Factorization and others). In this thesis we address several issues related to learning with matrix factorizations: we study the asymptotic behavior and generalization ability of existing methods, suggest new optimization methods, and present a novel maximum-margin high-dimensional matrix factorization formulation. (Copies available exclusively from MIT Libraries, Rm. 14-0551, Cambridge, MA 02139-4307. Ph. 617-253-5668; Fax 617-253-1690.)},
+    note = {AAI0807530},
+     school={Massachusetts Institute of Technology, USA}
 }
