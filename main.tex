@@ -11,14 +11,12 @@
 \usepackage[utf8]{inputenc}   % pacote de acentuação unicode
 \usepackage{graphicx}         % pacote de importar figuras
 \usepackage{times}            % pacote de fonte Adobe Times
-% \usepackage{palatino}
-% \usepackage{mathptmx}       % pacote de fonte Adobe Times nas fórmulas
 \usepackage{fixmath}          % pacote de math international standardization
 \usepackage[alf,abnt-emphasize=bf]{abntex2cite}	% pacote de citações abnt
 
 \newtheorem{definition}{Definition}
 
-\title{User sessions content-based identification, considering multiple accounts}
+\title{From Timeout-based to Item-by-Item Analysis: Splitting User Sessions Originated from Shared Accounts in Online Platforms}
 
 \author{Tura}{Matheus Toazza}
 \advisor[Prof.~Dr.]{Cordeiro}{Weverton Luis da Costa}
@@ -32,7 +30,16 @@
 \keyword{session identification}
 \keyword{recommendation systems}
 
-%\settowidth{\seclen}{1.10~}
+% TODO LIST
+% Table 4.4 de cutoff dist não tem suas distancias normalizadas
+% Melhorar descrição do Capitulo 2
+% Subceção 2.2.3 (Cluster analysis) tem só 1 parágrafo
+% Melhorar descrição do Capitulo 3 (Methodology)
+% Melhorar descrição da Seção 3.3
+% 4.6.2 Alternate Least Squares precisa de mais desenvolvimento
+% Escrever que o Affinity tem damping 0.9 nos experimentos no capítulo 4
+% explicar o Damping na seção de affinity propagation
+
 
 \begin{document}
 
@@ -78,7 +85,7 @@
 
 % =======================================================================
 
-%TODO No final da introdução fazer um paragrafo explicando brevemente cada capítulo.-7  
+%TODO No final da introdução atualizar o paragrafo que explica brevemente cada capítulo.  
 \chapter{Introduction}
 Most platforms nowadays rely on recommendation systems to create plug and play interactions between users and offered items, avoiding search time and making platform navigation minimal and crisp, however, some user behaviours or even the emerging privacy laws and growing concerns on data privacy, recommendation systems precision can get affected by profiling contamination on the user-item relations  and its interpretation by the system.
 
@@ -88,31 +95,11 @@ This problem is evident on commonly used time-based session identification techn
 
 On \cite{Jiang:2018:IUB:3209978.3210054} its main goal is identifying shared accounts in multimedia streaming and it addresses a clearly domain separation between \textit{account-level recommendation} and \textit{user-level recommendation}, but even so, they use a timeout along with their other techniques to break the session.
 
-
-% Por que é importante identificar com a máxima precisão possível essas sessões? 
-
-% Aqui, a resposta está nos trabalhos que usam clusterização de sessões para identificar perfis de usuários que navegam pelas plataformas usando contas compartilhadas. Aqui vale citar o trabalho de Jiang et al. (2017). Aqui vale destacar que esse trabalho, além de vários outros (incluir citações) usa timeout pra quebrar as sessões.
-
-% Vale discutir quais os problemas de usar timeout pra esse fim. 
-% General objective: 
-% O objetivo geral é verificar a viabilidade de detecção automática de sessões de usuários em plataformas online (como por exemplo de e-commerce) usando outras técnicas além de timeout. 
-% Specific Objectvies
-% Definir uma metodologia para a avaliação da eficácia e eficiência de diferentes técnicas na identificação de sessões. Outro objetivo específico é avaliar a viabilidade do uso da técnica X e da técnica Y, aplicando-se para esse fim a metodologia desenvolvida no escopo do trabalho. Justificar a escolha das técnicas.
-
-% Após detalhado um exemplo para contextualizar o trabalho, vem os objetivos geral e específicos. O objetivo geral é verificar a viabilidade de detecção automática de sessões de usuários em plataformas online (como por exemplo de e-commerce) usando outras técnicas além de timeout. 
-
-% Um objetivo específico é definir uma metodologia para a avaliação da eficácia e eficiência de diferentes técnicas na identificação de sessões. Outro objetivo específico é avaliar a viabilidade do uso da técnica X e da técnica Y, aplicando-se para esse fim a metodologia desenvolvida no escopo do trabalho. Justificar a escolha das técnicas.
-
-% Para a avaliação desse trabalho, foram utilizados traços tal e tal, que tem tais características (em resumo; mais adiante no documento, tu vai apresentar uma visão mais detalhada das características dos traços usados). 
-
-
-% O restante do trabalho está organizado como segue. No Capítulo 2 são apresentados os principais trabalhos relacionados. No Cap. 3 .... . No Cap. 4 ... . 
-
-
 The proposed work consists in two global objectives: (i) Verifying the possibility of an algorithm for session identification based on item category instead of timeout, 
 (ii) Create an evaluation method for reliably testing its accuracy and precision.
 
-globo.com dataset offered a good amount of data, it was preferred instead of others, but since they do not allow the use of news content, the [article] made available its embeddings that carries 250 dimensions of features from more than 300,000 articles. A dimensionality reduction technique was needed in order to reduce complexity of data and apply the \(Affinity Propagation\) clustering algorithm,
+\textit{globo.com} dataset offered a good amount of data, it was preferred instead of others due to it's availability and data abundance, however, since they do not allow the use of news content, \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331} made available its embeddings from that carries 250 dimensions of features for each of more than 300,000 articles, also \textit{globo.com} dataset aggregates streams of user clicks with more than 2.8 millions of clicks with labeled information such as user\_id and timestamp, the attribute of stream click is addressed at section \ref{globo_dot_com_dataset}.
+Dimensionality reduction technique was needed in order to reduce complexity of data and apply the \(Affinity Propagation\) clustering algorithm,
 
 The image below describes in general terms the pipeline of both proposals
 
@@ -123,23 +110,18 @@ The image below describes in general terms the pipeline of both proposals
     \label{fig:method_architecture}
 \end{figure}
 
-The dataset of choice in order to test its techniques was  \textit{globo.com dataset} from \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331} 
-that aggregates streams of user clicks with more than 2.8 millions of clicks.
-
-%TODO Deve ser atualizado
-On chapter 3 the concepts, history and motivation of choice on used algorithms are presented. Chapter 4 presents the problem and the solution definition.
-At the Fifth chapter, experimentation is revealed as its used tools, metrics are applied in order to measure accuracy and reliability of the proposed techniques.
+%TODO Está um pouco genérico, especificar alguns pontos.
+This work is organized as follow: Initially on chapter \ref{theoretical_background_and_related_work} basic concepts and methods needed to fulfil the following reasoning are introduced, as well as past related work on section \ref{related_works} that backed the choices made on this project. On the chapter \ref{methodology} the session problem modelling is introduced and described as well as known problems for multidimensional data and its manipulation. The section \ref{algorithms} that follows introduce solutions for the defined problems.
+Finally, on chapter \ref{results} error measurement modeling is addressed along with it metrics results.
 
 % =======================================================================
 
-\chapter{Theoretical Background and Related Work}
+\chapter{Theoretical Background and Related Work} \label{theoretical_background_and_related_work}
 Here you will find the foundations, they will be introduced as well as related works, those are crucial to assemble the complete picture of this work.
 
 At subsection \ref{basic_concepts}, basic concepts and attributes are introduced and on subsection \ref{basic_methods} methods and algorithms are introduced with its applicability and past usage. Related works are presented on subsection \ref{related_works}
 
     \section{Basic concepts} \label{basic_concepts}
-        % TODO explain each item
-        
         \begin{itemize}
             \item \(User\) is the person itself that is using the platform trough an account, most of times each user has its own account, but at sometimes, one account can have multiple users.        
             \item \(Account\) is a platform gateway and record that contains user detailed information and is used to register user history associating each requested item with its requester account id.
@@ -180,7 +162,7 @@ At subsection \ref{basic_concepts}, basic concepts and attributes are introduced
 
         \textit{Content-based vs Collaborative} classifies on an \(account\)-\(account\) relationship. On the first one the similarity between interacted items on a same account is used to retrieve similar new items that the user didn't yet explored, on the second one, the comparison is based upon other accounts that share similarity, so items from these accounts that are missing on the interaction history can be recommended. On state of art systems, both methods are combined in order to get the best results.    
         
-        % TODO subseção com apenas 1 parágrafo
+        % TODO subseção com apenas 2 parágrafos
         \subsection{Dimensionality reduction}
         The more dimensions a dataset has the more diluted the statistical significance becomes, 
         because data sparsity grows exponentially as the dimensions grow linearly,  
@@ -195,9 +177,8 @@ At subsection \ref{basic_concepts}, basic concepts and attributes are introduced
         It is the method for grouping items that share a vicinity/similarity and then labelling each one of the groups, normally, clustering algorithms are applied on points plotted on two-dimensional planes. There are many types of algorithms for classifying clusters, such as \textit{distribution-based}, \textit{density-based}, \textit{centroid-based}, \textit{connectivity-based} and others. In this work the centroid-based algorithm \(Affinity\ propagation\) was used for classifying clusters of similar \(items\), in this case each \(item\) represented by one news content.
 
 % =======================================================================
-% More related works
+
 \section{Related works} \label{related_works}
-% This chapter will present previous works that used user identification and sessionization as solution, both profile-level and time-level methodologies.
     
 \cite{DBLP:journals/corr/ZhangFIM14} addressed the problem of account sharing and modelled an algorithm for identifying movie ratings from individual users sharing an account. It is used a model of union of linear subspaces for spotting shared accounts and a model of clustering for user identification per account. This algorithm has good accuracy on most cases, showing that it is possible to identify a distinction from each user based on item category and action, however, this algorithm is restricted for explicit recommendation systems and movie datasets tend to be smaller in size and category amount in comparison to other media datasets.
 
@@ -220,15 +201,14 @@ One of the state of art contribution is from \cite{Jiang:2018:IUB:3209978.321005
 A problem that e-commerce recommendation systems face is when an advertisement of an exact size or individual characteristic for an user is required, because other users may end up contaminating the account history and spoiling the estimate of these unique attributes or sizes, on \cite{10.1145/3178876.3186149} et al the problem is discussed using Amazon.com e-commerce, instead of dealing with each account as a specific user and single profile, they propose a multi-persona approach boosting the accuracy, however, this method does not work well on products that have a high variability on its characteristics.
 
 
-
-
-% Aqui tá faltando trabalho relacionado.
 % =======================================================================
 
-\chapter{Methodology}
-At the current chapter, problem definition, algorithms, tools used for the proposed methods and its validations are discussed and presented with its motivations.
+\chapter{Methodology} \label{methodology}
+At the current chapter, problem definition, algorithms, tools used for the proposed methods and its validations are discussed and presented with its motivations. The current chapter is ordered as follow: at section \ref{problem_definition}, the problem definitions arise, the concept of session is defined as sets of items and the problem of simulating shared accounts from different account sessions is as well defined, mathematical and theoretical problems from data scarcity and sparcity are introduced and discussed.
 
-    \section{Problem definition}
+On the section \ref{algorithms} the algorithms used for solving most of those problems are introduced and explained, furthermore, a comparison of those algorithms and the state-of-art solutions and motivations of choice are addressed at this section. At the last section \ref{technology_usage}, the technology used is mentioned as well as its application on the dataset.
+
+    \section{Problem definition} \label{problem_definition}
     \begin{definition}
     Let \(I \) be a set of items where \(i \in I \) and an item \(i\) represents a news. Let a set of users \(U\) where \(u \in U \) and each user \(u\) does not repeat itself into the set.
     A session \(s\) is defined by a list of items \(s_{1} = \{i_{1}, i_{2}, i_{3}\}\) and belongs to an individual user \(u_{1}\), the items may repeat inside a session and also between sessions.
@@ -236,6 +216,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
     
     It is considered by definition, that each User is an account itself, and that most of users doesn't share its account, and the amount of shared accounts have low  statistical significance into the end result.
     
+    % Mencionar o motivo de não ter feito a separação de test data e training data de maneira similar ao do Zhang
         \subsection{Simulated Accounts and Sessions}
         In order to simulate a shared account, two sessions are concatenated into a new session as \(s_{1} = \{i_{1}, i_{2}, i_{3}\}\) and  \(s_{2} = \{i_{7}, i_{8}, i_{9} ...\}\) and those sessions must belong to different users.
     
@@ -245,12 +226,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
     
         The objective of the proposed method is to identify the exact frontier-item between sessions and revert this concatenation process separating the new session  \(s_{12}\) into the original \(s_{1}\) and \(s_{2}\) sessions, in that scenario, item \(i_{3}\) would be the frontier-item, since it is the last item of the first session \(s_{1}\).
     
-        This process should use only the item content or category as parameters, being blind to the user ids or timestamps.    
-        % Organizar os trabalhos relacionados entre:
-        
-        % Secão 2.1: Investigações que dependem da identificação de sessões online de usuários. Aqui entra, por ex., o trabalho de Jiang et al. (2017). 
-        
-        % Secão 2.2: Investigações que discutem possíveis técnicas para quebrar sessões online dos usuários.
+        This process should use only the item content or category as parameters, being blind to the user ids or timestamps.
         
         Time-based sessions are the most commonly used as consensus as a method for example at \cite{10.1145/3184558.3191582} it is used a defined session trough a fixed time, but the way they make it flexible, were by using a decaying time-based weight into the session items, they used this approach to overcome the short life-span of news. At the proposed method, since not the news itself, but it's topic, the short life-span problem wasn't expected to be relevant enough.
     
@@ -259,10 +235,9 @@ At the current chapter, problem definition, algorithms, tools used for the propo
     
         A \textit{collaborative-based} system is no different in terms of this flaw, but it is more resistant since it collaboratively uses content history from other users, it can fill the gap against data scarcity from fresh users.
         
-        % TODO refazer o primeiro método com 200 items também.
+        % TODO sugestão: refazer as primeiras métricas com 200 items também.
         In order to avoid this dilemma, the proposed metrics are based on previously filtered sessions, where the first method use sessions with more than 10 items, and the second method, more than 200 items.
     
-        % Matheus: Necessário? na introdução este problema é brevemente descrito e seu autor citado é o motivo do uso de um algoritmo como o tSNE.
         \textbf{Curse of dimensionality Problem.} Since content analysis and classification requires a complex analysis that generates great amounts of features/dimensions and usually recommendation systems data are sparse, the curse of dimensionality \cite{10.1093/imamat/24.1.59} is very relevant as a problem because usually any media content should be translated into a multi dimensional space before the classification, contributing to a crescendo \textit{curse of dimensionality}.
 
         
@@ -288,7 +263,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
     Non-linear means that if you have highly dimensional data that has a geometric representation of a curvy non-convex surface of points, for example, PCA due to its linearity would make a straight cut into this curve finding straight planes and never really fitting into the curvy surface, PCA has its algorithms variances that reduce its problems, like the Kernel PCA, but tSNE is considered to be the state-of-art for reasons below.
 
     tSNE It is a sequel of SNE (Stochastic Neighborhood embedding), but because the current distribution from SNE not only hardly clump the points close to each other but it is use to be computationally slow, because of the use of exponentiation when calculating the distribution equation.
-    % TODO show t-student formula, compare the performance against gaussian model
+    % TODO show t-student formula, explain the differences in performance against gaussian model
     The "t" letter stands for t-student distribution, it is computationally faster and has a less severe penalty on point agglutination due to its natural flattened curve, thus winning the "state-of-art" title due to its low cost and better precision.
 
     On figure \ref{fig:tsne_plot} there is a plot of tSNE applied on Globo dataset highly dimensional embedding that represents the content of each news, this exactly plot and its data was used on the proposed method, each point represented below is a relationship of a Xs, Ys coordinate with an article id 
@@ -311,8 +286,6 @@ At the current chapter, problem definition, algorithms, tools used for the propo
         \label{fig:affinity_twins}
     \end{figure}
     
-    % TODO \cite{10.5555/1087620} <- phd thesis do matrix factorization
-    % \subsection{}
     \textbf{Matrix Factorization.} Netflix is known for it's competitions for collaborative filters algorithms, in 2008 \textit{matrix factorization} \cite{10.5555/1087620} was used and achieved a huge breakthrough in collaborative filtering algorithms, and it is like the prime factors for grown ups, using matrices as factors instead of just scalar numbers, it is a useful mechanism to separate the users-items matrix into a items' matrix and a users' matrix, that their multiplication result in the original users-items matrix, results into Item X User original association matrix that each item is the relation of one user to a single item.
     The usefulness of this factorization, is that since the original matrix is sparse, you can fill the missing values by making inferences on the factorized data, because not every user in its history has real relationship with every item.
     An optimal way of doing so is by using the \textit{Alternate Least Squares} algorithm explained below that uses  \textit{Gradient Descent} as convergence algorithm.
@@ -321,12 +294,12 @@ At the current chapter, problem definition, algorithms, tools used for the propo
     \textbf{Alternate Least Squares.} It is a faster variant of the Matrix Factorization that allows it to be computational distributed, the as matrix factorization, it has SVD as central role on the factorization between item and user matrices, but in this case, a cost function with an error function is alternated between each matrix, updating the elements of one matrix at a time, this computational behaviour reduces the complexity of the cost function and allows it to be computed in a distributed fashion.
     Today a common implementation of ALS is from Spark \(Hadoop\) in java, but also have facade libraries that allow calling ALS from spark \(Hadoop\) from other languages like Scala and Python (Pyspark).
 
-    \section{Technology usage}
+    \section{Technology usage} \label{technology_usage}
 
     It was used \(Python3\) with \textit{pandas} \cite{reback2020pandas} and \textit{numpy} as main data manipulation, \(Pyspark\) was used for ALS method recommender system. 
     \(Pyspark\) is a python library that is a facade for a java spark hadoop spark application server that uses map/reduce in order to make distributed computations.
 
-    For tSNE and Affinity propagation \(sklearn\) library was the choice.
+    For both tSNE and Affinity propagation \(sklearn\) library was the choice.
         
         \subsection{Applying Dimensionality reduction}
         Because Globo news text data is closed source, \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331} made available the trained article embeddings data \footnote{https://www.kaggle.com/gspmoreira/news-portal-user-interactions-by-globocom} generated from its unique \textit{CHAMALEON} RNN-based algorithm. The embedding file consists into a matrix of 250 dimensions of features and 364,047 news articles, those features are a representation of the content for each respective news article.
@@ -334,7 +307,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
         On the proposed method only the following data and respective embedding were considered: \textit{click\_timestamp, article\_id} and \textit{{}user\_id}.
         
     
-        Since on their work tSNE was mentioned as a good method for dimensionality reduction, tSNE was applied on the embedding, resulting into a pair of coordinates X, Y for each article id as the dataframe sample below:
+        Since on their work tSNE was mentioned as a good method for dimensionality reduction, tSNE was applied on the embedding, resulting into a pair of coordinates \(X, Y\) for each article id as the dataframe sample below:
         
         \begin{table}[!ht]
             \centering
@@ -384,13 +357,13 @@ At the current chapter, problem definition, algorithms, tools used for the propo
 
 % =======================================================================
 
-\chapter{Results}
+\chapter{Results} \label{results}
 
     Here there will be a comparison between \(euclidean\ distance\) threshold against \(alternate\ least\ square\) methods and its parameters variations, different combinations of items and sessions were performed like the impact of ordering or shuffling items by timestamp, different affinity propagation damping factors and different sizes of sessions.
     
     On section \ref{globo_dot_com_dataset} Globo dataset properties are presented, on \ref{euclidean_distance_heuristic}, section \ref{session_simulation} the simulation of sessions as metric method is adressed with its results and on \ref{affinity_propagation_results} heatmaps from iterations are shown.
 
-    % TODO como foi separado test data vs non-test data?
+    % TODO como foi separado test data vs non-test data, foi seguido o mesmo método do Zhang 1/4 vs 3/4??
     % TODO talvez seja interessante uma seção de performance(precision and recall) e limites do algoritmo (e do método de clusterização)
     % TODO seção pode ser chamada apenas de Datasets
     \section{Globo.com dataset} \label{globo_dot_com_dataset}
@@ -445,7 +418,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
         
         \begin{itemize}
             \item The cutoff \(c\) is a row index that belongs to one of the sessions, this index is found by the cutoff trigger heuristic at definition \ref{euclidean_distance_threshold_definition}
-            \item Because the two sessions doesn't have the same amount of items, thus asymmetric, a normalization mapping of the error metric is performed.
+            \item Because the two sessions doesn't have the same amount of items, thus asymmetric, a normalization mapping of the error metric is performed, the normalization effect is described on a gray color scale on table \ref{tab:cutoff_table}.
             \item It is calculated the difference between the number of items from the inferred index(found by heuristic) and the perfect index(the real cutoff) and divided by the total number of items at the artificial session (made by two real sessions), as represented above in the gray-colored table by the error column:
             
             \begin{table}[!ht]
@@ -484,13 +457,12 @@ At the current chapter, problem definition, algorithms, tools used for the propo
             So in this example, the index 3 is the perfect cutoff, representing the real threshold between the two sessions, the picked index by the cutoff heuristic, will receive the respective error from its index row.
         \end{itemize} 
 
-        % TODO subseção com apenas 1 parágrafo
         \section{Sessions simulation} \label{session_simulation}
         Because the dataset already have labeled the respective \textit{user id} in each row, it was considered that the most part of accounts were in fact from individual users, in that case, it is assumed that even if some users really share the same account, this would be statistically irrelevant when analyzing the whole dataset.
         Considering this scenario true, the simulated sessions is constructed as a concatenation of two streams of two separated user ids 
         as addressed on table \ref{session_simulation} a sample from a simulated session.
         
-        Notice that the column \textit{distance} is the euclidean distance from current centroid of row index \(n\) and centroid from row index \(n - 1\)
+        Notice that the column \textit{distance} stands for euclidean distance from current centroid of row index \(n\) and centroid from row index \(n - 1\) in a simulated session table.
         
         \begin{table}[!ht]
             \centering
@@ -519,7 +491,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
         
         There were two different types of measurements, one of them had time ordering were each user session had its items ordered by its timestamp, on the second one, the items were completely shuffled, removing time influence.
         
-        A floor cutoff distance was pick as 1, and the ceiling as 60, with this limits defined, 15 linearly spaced cutoff distances were generated as input as shown by columns \textit{cutoff dist} on table \ref{tab:cutoff_timestamp_ordered_shuffled}, for each session cut attempt, an error were calculated and attributed as section \ref{euclidean_distance_heuristic} describes, an array of error metrics was created and an \textit{error mean} and also an \textit{error standard deviation}, described on second and third column of table \ref{tab:cutoff_timestamp_ordered_shuffled}.
+        A floor cutoff euclidean distance was pick as 1, and the ceiling as 60, with this limits defined, 15 linearly spaced cutoff distances were generated as input as shown by columns \textit{cutoff dist} on table \ref{tab:cutoff_timestamp_ordered_shuffled}, for each session cut attempt, an error were calculated and attributed as section \ref{euclidean_distance_heuristic} describes, an array of error metrics was created and an \textit{error mean} and also an \textit{error standard deviation}, described on second and third column of table \ref{tab:cutoff_timestamp_ordered_shuffled}.
         
         Looking on both mean and std metrics, it has a neat meaning that time order does not affect the euclidean threshold heuristic, however, it is important to notice the high error mean (more than 0.5), furthermore, the results shows that the lower the error mean, the higher the std by a significant factor rising considerably the \textit{coefficient of variation} (\(std \div mean\) ), thus making it less reliable. For example, on table \ref{tab:cutoff_timestamp_ordered_shuffled}, notice that on the table with time ordering, the lowest error mean is 0.611 and its standard deviation mean is 0.3 or in other words, a deviation of 30 \%, making this cutoff parameter unreliable for the session cutting purpose.
         
@@ -582,7 +554,7 @@ At the current chapter, problem definition, algorithms, tools used for the propo
         
         In a single topic like Math, many areas can be classified like algebra, calculus, statistic and so on, at the same time, you can be more generic, and simply address that all those areas are simply Math, and then you segregate other topics as Portuguese, Biology, Math and so on without opening into details.
         
-        Since the \textit{damping factor} from the Affinity Propagation Algorithm describe on \ref{algorithms} changes the amount of classified clusters, another parameter was introduced on the error metrics calculations and that being the \texit{damping factor}. For different damping factors, the amount of topics is addressed on table \ref{tab:damping_factor}
+        Since the \textit{damping factor} from the Affinity Propagation Algorithm described on section \ref{algorithms} changes the amount of classified clusters, another parameter was introduced on the error metrics calculations and that being the \textit{damping factor}. For different damping factors, the amount of topics is addressed on table \ref{tab:damping_factor}
         
         \begin{table}[H]
             \centering
@@ -602,12 +574,9 @@ At the current chapter, problem definition, algorithms, tools used for the propo
             \label{tab:damping_factor}
         \end{table}
         
-        The damping parameter was fixed at 0.9 and similarly as \ref{temporal_ordering_factor} a number of 15 cutoff values were tested between values 1 and 60, linearly spaced for each iteration with a different cutoff . The output was a vector of error values of the same size of the simulated sessions(one for each session, about 32 thousand sessions).
+        Similarly as section \ref{temporal_ordering_factor} a number of 15 cutoff values were tested between values 1 and 60, linearly spaced for each iteration with a different cutoff . The output was a vector of error values of the same size of the simulated sessions(one for each session, about 32 thousand sessions).
         Then, from this error vector, it was calculated its mean and standard deviation for each iteration (15 iterations), so that we could measure its reliability and precision.
         
-        
-
-    
         The heatmaps error results are interpreted as the following:
         \begin{itemize}
             \item The Vertical axis of the represents the affinity propagation damping factor
@@ -615,8 +584,9 @@ At the current chapter, problem definition, algorithms, tools used for the propo
             \item the value of each item on the heatmap corresponds to one of two metric errors: Mean error, Standard deviation error.
         \end{itemize}
     
-        The objective of this metric is find a lower than 50\% mean error and the lowest \textbf{coefficient of variation} (\(std \div mean\) ). 
+        The objective of this metric is finding a lower than 50\% mean error and the lowest \textbf{coefficient of variation} (\(std \div mean\) ). 
         
+        % TODO explicar resultados, foram bons? foram ruins?
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.95\textwidth]{images/error_mean.png}
