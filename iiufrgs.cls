@@ -636,7 +636,7 @@
 
 \captiondelim{ -- }
 \setlength{\abovecaptionskip}{0pt}
-\setlength{\belowcaptionskip}{0pt}
+\setlength{\belowcaptionskip}{5pt}
 \setlength{\belowlegendskip}{0pt}
 
 \captiontitlefont{\small}
@@ -663,6 +663,6 @@
 }{
         \end{flushright}
 }
-\newenvironment{agradecimentos}{
-	\chapter*{Agradecimentos}
+\newenvironment{acknowledgements}{
+	\chapter*{Acknowledgements}
 }{}

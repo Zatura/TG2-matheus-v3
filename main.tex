@@ -13,10 +13,11 @@
 \usepackage{times}            % pacote de fonte Adobe Times
 \usepackage{fixmath}          % pacote de math international standardization
 \usepackage[alf,abnt-emphasize=bf]{abntex2cite}	% pacote de citações abnt
+\usepackage{subcaption}
 
 \newtheorem{definition}{Definition}
 
-\title{From Timeout-based to Item-by-Item Analysis: Splitting User Sessions Originated from Shared Accounts in Online Platforms}
+\title{From Timeout-based to Item-by-Item Analysis: Investigating Methodologies for Splitting User Sessions Originated from Shared Accounts in Online Platforms}
 
 \author{Tura}{Matheus Toazza}
 \advisor[Prof.~Dr.]{Cordeiro}{Weverton Luis da Costa}
@@ -30,36 +31,30 @@
 \keyword{session identification}
 \keyword{recommendation systems}
 
-% TODO LIST
-% Table 4.4 de cutoff dist não tem suas distancias normalizadas
-% Melhorar descrição do Capitulo 2
-% Subceção 2.2.3 (Cluster analysis) tem só 1 parágrafo
-% Melhorar descrição do Capitulo 3 (Methodology)
-% Melhorar descrição da Seção 3.3
-% 4.6.2 Alternate Least Squares precisa de mais desenvolvimento
-% Escrever que o Affinity tem damping 0.9 nos experimentos no capítulo 4
-% explicar o Damping na seção de affinity propagation
-
-
 \begin{document}
 
 \maketitle
 
+\begin{acknowledgements}
+First and foremost, I would like to dedicate this work to my parents Genir and Lurdes that supported me during my development as graduate student, and to my friend Dennis Balreira that helped me on the most difficult storms from hard and demanding disciplines and also to my homeless friend Paulo, that used to encourage me to finish my degree every time I used to see him on streets.
+
+I am deeply grateful to my advisor, Weverton Cordeiro for his profissionalism and clarity on the way he guided me trough and also to my co-advisor Renata Galante that faded any misdirection with wisdom.
+
+Special thanks to Carolina Nery that helped me with discussions and insights during the construction of this work.
+\end{acknowledgements}
+
 % dedicatoria
-% \clearpage
-% \begin{flushright}
-%     \mbox{}\vfill
-%     {\sffamily\itshape
-%       ``If I have seen farther than others,\\
-%       it is because I stood on the shoulders of giants.''\\}
-%     --- \textsc{Sir~Isaac Newton}
-% \end{flushright}
+\clearpage
+\begin{flushright}
+    \mbox{}
+    \vfill
+    {\sffamily\itshape
+      ``Nothing in life is to be feared, it is only to be understood.\\
+      Now is the time to understand more, so that we may fear less.''\\}
+    --- \textsc{Marie Curie}
+\end{flushright}
 
-% agradecimentos
-%\chapter*{Agradecimentos}
-%Agradeço ao \LaTeX\ por não ter vírus de macro\ldots
-
-
+% TODO ponctuate the difference that you are using a content-only timeless technique
 \begin{abstract}
   Although some content providers register stream data from its users and can track their profile style for content recommendation, when two or more users share a same account, their true profile activity is obfuscated and fuzzed, this user behavior hinders the recommendation systems from providers. This work proposes a way of classifying users' stream data trough sessions based on its media content, opening the possibility for breaking a same account profile within multiple user profiles and consequently identifying this activity. In this work dimensionality reduction and clustering methods are used to classify user stream data into sessions that correspond to each respective user profile.
 \end{abstract}
@@ -76,9 +71,13 @@
 
 \begin{listofabbrv}{SPMD}
     \item[PCA] Principal Component Analysis
-    \item[tSNE] t-Distributed Stochastic Embedding
-    \item[ALS] Alternate Least Squares
+    \item[SNE] Stochastic Neighbor Embedding
+    \item[tSNE] t-Distributed Stochastic Neighbor Embedding
+    \item[EM] Expectation-Maximization Clustering
     \item[RNN] Recurrent Neural Networks
+    \item[ALS] Alternate Least Squares    
+    \item[CF] Colaborative Filtering
+    \item[CB] Content-based
 \end{listofabbrv}
 
 \tableofcontents % sumario
@@ -91,19 +90,19 @@ Most platforms nowadays rely on recommendation systems to create plug and play i
 
 One commonly known example responsible for grinding the recommendation systems performance is the practice of account sharing that mixes and masks its account profiles against its real users. Account sharing behaviour is non-intentional in most cases, since device sharing is common, there could be a situation where some individual into his computer is searching videos in a logged-in streaming platform for specific subjects like for example C++ usage, but at some point, it leaves the computer empty without performing account logout, another individual then starts using the same device and platform but for a completely different subject, like children's cartoon.
 
-This problem is evident on commonly used time-based session identification techniques such as \cite{10.1145/2736277.2741117}, the presented scenario would fail in identifying sessions, if chosen period threshold for breaking sessions is long enough, the elapsed time from user permutation usage on platform could be insignificant on the total session time, thus preserving the unity of the session, but in reality two completely sessions have happened during this period.
+This problem is evident on commonly used time-based session identification techniques such as \cite{halfaker2015}, the presented scenario would fail in identifying sessions, if chosen period threshold for breaking sessions is long enough, the elapsed time from user permutation usage on platform could be insignificant on the total session time, thus preserving the unity of the session, but in reality two completely sessions have happened during this period.
 
-On \cite{Jiang:2018:IUB:3209978.3210054} its main goal is identifying shared accounts in multimedia streaming and it addresses a clearly domain separation between \textit{account-level recommendation} and \textit{user-level recommendation}, but even so, they use a timeout along with their other techniques to break the session.
+On \cite{jiang2018} its main goal is identifying shared accounts in multimedia streaming and it addresses a clearly domain separation between \textit{account-level recommendation} and \textit{user-level recommendation}, but even so, they use a timeout along with their other techniques to break the session.
 
 The proposed work consists in two global objectives: (i) Verifying the possibility of an algorithm for session identification based on item category instead of timeout, 
 (ii) Create an evaluation method for reliably testing its accuracy and precision.
 
-\textit{globo.com} dataset offered a good amount of data, it was preferred instead of others due to it's availability and data abundance, however, since they do not allow the use of news content, \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331} made available its embeddings from that carries 250 dimensions of features for each of more than 300,000 articles, also \textit{globo.com} dataset aggregates streams of user clicks with more than 2.8 millions of clicks with labeled information such as user\_id and timestamp, the attribute of stream click is addressed at section \ref{globo_dot_com_dataset}.
+\textit{globo.com} dataset offered a good amount of data, it was preferred instead of others due to it's availability and data abundance, however, since they do not allow the use of news content, \cite{moreira2018chameleon} made available its embeddings from that carries 250 dimensions of features for each of more than 300,000 articles, also \textit{globo.com} dataset aggregates streams of user clicks with more than 2.8 millions of clicks with labeled information such as user\_id and timestamp, the attribute of stream click is addressed at section \ref{globo_dot_com_dataset}.
 Dimensionality reduction technique was needed in order to reduce complexity of data and apply the \(Affinity Propagation\) clustering algorithm,
 
 The image below describes in general terms the pipeline of both proposals
 
-\begin{figure}[!ht]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{images/experiment.png}
     \caption{Proposed validation method}
@@ -111,15 +110,15 @@ The image below describes in general terms the pipeline of both proposals
 \end{figure}
 
 %TODO Está um pouco genérico, especificar alguns pontos.
-This work is organized as follow: Initially on chapter \ref{theoretical_background_and_related_work} basic concepts and methods needed to fulfil the following reasoning are introduced, as well as past related work on section \ref{related_works} that backed the choices made on this project. On the chapter \ref{methodology} the session problem modelling is introduced and described as well as known problems for multidimensional data and its manipulation. The section \ref{algorithms} that follows introduce solutions for the defined problems.
+This work is organized as follow: Initially on chapter \ref{theoretical_background_and_related_work} basic concepts and methods needed to fulfil the following reasoning are introduced, later related works on chapter \ref{related_works} that backed the choices made on this project. On the chapter \ref{methodology} the session problem modelling is introduced and described as well as known problems for multidimensional data and its manipulation. The section \ref{algorithms} that follows introduce solutions for the defined problems.
 Finally, on chapter \ref{results} error measurement modeling is addressed along with it metrics results.
 
 % =======================================================================
 
-\chapter{Theoretical Background and Related Work} \label{theoretical_background_and_related_work}
+\chapter{Theoretical Background} \label{theoretical_background_and_related_work}
 Here you will find the foundations, they will be introduced as well as related works, those are crucial to assemble the complete picture of this work.
 
-At subsection \ref{basic_concepts}, basic concepts and attributes are introduced and on subsection \ref{basic_methods} methods and algorithms are introduced with its applicability and past usage. Related works are presented on subsection \ref{related_works}
+At subsection \ref{basic_concepts}, basic concepts and attributes are introduced and on subsection \ref{dimensionality_reduction} and \ref{cluster_analysis} methods and algorithms are introduced with its applicability and past usage. Related works are presented on subsection \ref{related_works}
 
     \section{Basic concepts} \label{basic_concepts}
         \begin{itemize}
@@ -127,7 +126,7 @@ At subsection \ref{basic_concepts}, basic concepts and attributes are introduced
             \item \(Account\) is a platform gateway and record that contains user detailed information and is used to register user history associating each requested item with its requester account id.
             \item \(Item\) represents the consumed media, can be music, image, video or text in case of a news article.
             \item \(Clickstream\) is a group of requested items ordered by request timestamp.    
-            \item \(Session\) is a subset of a stream, the beginning and end of a session can be marked considering user idleness, where the time difference between one requested item and the next one is higher than a certain threshold.
+            \item \(Session\) is a subset of a \(clickstream\), the beginning and end of a session are commonly tagged considering user idleness, where the time difference between one requested item and the next one is higher than a certain period threshold, however, the proposed method is timeless and take in account only content categories as a session split threshold.
         \end{itemize}
 
         % User and Account
@@ -139,16 +138,15 @@ At subsection \ref{basic_concepts}, basic concepts and attributes are introduced
         in any other dataset, the click id is a reference to news, music, 
         image, video or any metadata associated. A session is a well defined 
         segment from a stream of items from one account. There are many ways 
-        of defining session boundaries, on \cite{10.1145/362883.362920} the session 
-        is defined by using time threshold, same as \cite{10.1145/2736277.2741117}. 
+        of defining session boundaries, on \cite{arlitt2000} the session 
+        is defined by using time threshold, same as \cite{halfaker2015}. 
         For example when a user stays inactive for an amount of time, that can be 
         considered an end of a session and start of another. In this proposal the 
         sessions will be split considering the content type in order to identify 
         account sharing or even user profiling for different user tastes.
 
 
-    \section{Basic methods} \label{basic_methods}
-        \subsection{Recommendation system}
+        \section{Recommendation system}
         The role of a \textit{recommendation system} is to make inferences of new \(items\) that the \(user\) would like and suggest them. It is a set of algorithms that together they can return for example an ordered list of probability/similarity from items that were previously compared against other items. These other items must be similar from the ones that the \(account\) have interacted or similar accounts have interacted with.
         Variables such as click-rate, visit frequency, time spent on page can be considered to calculate an affinity between interacted \(items\) and \(account\).
 
@@ -163,31 +161,82 @@ At subsection \ref{basic_concepts}, basic concepts and attributes are introduced
         \textit{Content-based vs Collaborative} classifies on an \(account\)-\(account\) relationship. On the first one the similarity between interacted items on a same account is used to retrieve similar new items that the user didn't yet explored, on the second one, the comparison is based upon other accounts that share similarity, so items from these accounts that are missing on the interaction history can be recommended. On state of art systems, both methods are combined in order to get the best results.    
         
         % TODO subseção com apenas 2 parágrafos
-        \subsection{Dimensionality reduction}
-        The more dimensions a dataset has the more diluted the statistical significance becomes, 
+        \section{Dimensionality reduction} \label{dimensionality_reduction}
+        The more dimensions a data has the more diluted the statistical significance becomes, 
         because data sparsity grows exponentially as the dimensions grow linearly,  
-        this phenomena is called \textit{the curse of dimensionality} and is described on \cite{10.1093/imamat/24.1.59} and one on way to finding statistical significance are techniques of \textit{dimensionality reduction}, further discussions and solutions are discussed on \ref{data_scarcity_and_sparcity}.
+        this phenomena is called \textit{the curse of dimensionality} and is described on \cite{marimont1979} and one on way to finding statistical significance are techniques of \textit{dimensionality reduction}, further discussions and solutions are discussed on \ref{data_scarcity_and_sparcity}.
         
-        One of firsts successful algorithms is called \textit{Principal Component Analysis}, 
-        its model was developed in 1933 by \cite{hotelling:33} and it consists in finding linear combinations between pair of dimensions that corresponds to most statistical significance trough variance, where the two most significant linear combinations becomes the main dimensions and its points are plotted in a two dimensional Cartesian plane.
+        One of firsts successful algorithms for this purpose is called \textit{Principal Component Analysis} 
+        by \cite{hotelling1933} and it consists in finding linear combinations between pair of dimensions that corresponds to most statistical significance trough variance, where the two most significant linear combinations becomes the main dimensions and its points are plotted in a two dimensional Cartesian plane.
         Dimensionality reduction techniques are used before applying Clustering algorithms, because normally media contents are described as an array of multidimensional features.
         
+        Since media content normally arrives in image, sound or text, content classification is a multidimensional case, those types of data are rich in both syntactic and semantic information, the common pipeline of classification rely on techniques of feature extraction following dimensionality reduction, however, this type of content are not made of linear combinations problems, but non-linear relationships between dimensions, for this purpose several techniques rather than PCA (that is linear by its nature) were developed on the past. For the purpose of this work, given the non linearity of news embeddings and as mentioned on \cite{moreira2018chameleon}, provider of the dataset embeddings used on this work, tSNE method from \cite{maaten2008} was considered as the best approach; this technique uses \textit{gradient descent} \cite{bryson1962} to minimize \textit{relative entropy} \cite{kullback1951} from distance distributions between all combinations of pairs from the data points; in fact, those distributions are the euclidean distance from each point against others and each distance projected into a distribution function, the innovative difference between tSNE and its predecessor SNE \cite{hinton2002} is that it uses t-student distribution instead of gaussian, that is far more cheaper computationally and generates similar but denser results.
+        
         % TODO subseção com apenas 1 parágrafo
-        \subsection{Cluster analysis}
-        It is the method for grouping items that share a vicinity/similarity and then labelling each one of the groups, normally, clustering algorithms are applied on points plotted on two-dimensional planes. There are many types of algorithms for classifying clusters, such as \textit{distribution-based}, \textit{density-based}, \textit{centroid-based}, \textit{connectivity-based} and others. In this work the centroid-based algorithm \(Affinity\ propagation\) was used for classifying clusters of similar \(items\), in this case each \(item\) represented by one news content.
+        % TODO why affinity propagation? what about other methods?
+        \section{Cluster analysis} \label{cluster_analysis}
+        It is the method for grouping items that share a vicinity/similarity and then labelling each one of the groups, normally, clustering algorithms are applied on points plotted on two or three dimensional planes. There are many types of clustering algorithms but for the construction of four main used types of algorithms were taken into account describe below:
+        
+        \begin{itemize} 
+            \item \textbf{Centroid-based}
+            
+            One of the oldest clustering algorithms is k-means \cite{steinhaus1956, macqueen1967}, \(k\) is the number of clusters pick at the beginning of the algorithm, than \(k\) randomly cluster centers are introduced into the set of points, it is attributed each point to the closest cluster center in respect to it's euclidean distance, this process is repeated many times as necessary to reduce the variance between each cluster points, however, the problem of this kind of algorithm is that the user must test the \(k\) parameter multiple times till it find the best fit, \textit{Affinity-propagation} algorithm  \cite{frey2007} on the other hand, it doesn't know previously the quantity of cluster centers, it is discovered during the calculation, for that reason \textit{affinity propagation} was chosen for the proposed method. 
+            
+            \item \textbf{Distribution-based} 
+            
+            This clustering category works as a soft clustering, since during calculation it attributes for every point it is assigned a probability of ownership from each individual cluster, in every step of calculation, those probabilities are update and in the end, the point is claimed by the cluster which it has the biggest probability of ownership.
+            
+            The most used distribution-based algorithm is \textit{EM clustering} from \cite{dempster1977} where the mentioned steps are split into \textit{Expectation (E)} steps followed by \textit{Maximization (M)} steps in alternation between each other, it can be viewed also as an \textit{relative entropy} reduction problem \cite{kullback1951} between the expected distribution and the resulting distribution.
+            
+            \item \textbf{Density-based}
+            
+            It is based on the concept of "density-reachability"; the most used density-based method is DBSCAN \cite{ester1996}, where euclidean distance is used as a radius from the observed point, where every neighbor point inside its radius is "contaminated" by its cluster label, the problem of this kind of method is when you have homogeneous density of points or a smooth transition of density from on cluster to another, this can mislead the algorithm. DBSCAN complexity has a \(O(n\ log\ n)\) average complexity. It is commonly used for unsupervised learning and anomally detection.
+            
+            \item \textbf{Hierarchical-based}
+            
+            They are divided into \textit{agglomerative} and \textit{divisive} categories, on the first, it merges small clusters into big clusters, on the second one, it keep subdividing from one big starting cluster to more small clusters, they are mainly used for genetics and species classification and two famous methods are \textit{single-linkage} and \textit{complete-linkage} \cite{johnson1967, sibson1973} clustering. Hierarchical clustering algorithms are considered very slow since they have quadratic or cubic complexity, for that reason this type of clustering method was not chosen for the proposed work.
+        \end{itemize}
 
 % =======================================================================
 
-\section{Related works} \label{related_works}
-    
-\cite{DBLP:journals/corr/ZhangFIM14} addressed the problem of account sharing and modelled an algorithm for identifying movie ratings from individual users sharing an account. It is used a model of union of linear subspaces for spotting shared accounts and a model of clustering for user identification per account. This algorithm has good accuracy on most cases, showing that it is possible to identify a distinction from each user based on item category and action, however, this algorithm is restricted for explicit recommendation systems and movie datasets tend to be smaller in size and category amount in comparison to other media datasets.
+\chapter{Related works} \label{related_works}
+There were a clear distinction between timeout, time-decay and profile-based models on account sharing and user identification related works, for that reason, they are presented as follow divided by three addressed categories as timeout, time-decay and profile-based methods.
 
-The work \cite{10.1145/2736277.2741117} consists in monitoring clickstream of different domains on online activity browsing (Games, search engines, page views), thus achieving session identification using a fixed 30 minutes inactivity threshold as session identification, authors demonstrates high regularity between different sessions from a same user. 
+\section{Timeout models}
+
+An attempt to categorize user sessions at Youtube platforms, \cite{gill2008} made a distinction between user level and session level characterization, its definition of session beginning and end is a timeout fashion and the explanation for this is that analyzing traffic network is challenging because most of times there is no clear registry of login and logout. They used a benchmark technique to define what is the best time threshold that would really define a session; they found out that 40 minutes of inactivity as threshold is the spot because from this point on, the number of sessions starts to level-off considerably.
+Nonetheless, they do not take into account multiple users swapping use like scenarios were a computer can have a very fast turn over, like lan-houses or public spaces with computers or even paid multi-platform account sharing such as \url{togetherprice.com} and \url{kotas.com.br}.
+
+% 1 Hora
+One example of account decomposition is \cite{bajaj2016} that individualize each user as a  persona from online TV platforms accounts. Account sharing is very common between families  in front of a TV. This persona-based individualization uses TV logs to generate user profiles; cosine similarity is applied on item frequency matrices that later are clustered using hierarchical clustering where each cluster is an account, lastly, they use their \(Apriori\) algorithm to categorize each persona, however, their session categorization is based on hourly inactivity timeout and their technique is restricted to TV platforms.
+
+% 30 minutes
+The work \cite{halfaker2015} consists in clickstream monitoring of different domains on online activity browsing (games, search engines, page views), thus achieving session identification using a fixed 30 minutes inactivity threshold as session identification, authors demonstrates high regularity between different sessions from a same user. 
 Since they do not address account sharing, there is a chance that threshold based on item usage or user behaviour instead of time usage, would have more impact on identifying sessions related to different users.
 
-On \cite{JINDAL2020} et al, they propose a dynamic threshold heuristic based on user behaviour history, their discoveries show that short time user navigation are more often and less correlated than longer ones, making them easier to categorize and achieving a higher accuracy. However, this method apply a threshold into the user behaviour pattern, and differently, this work relies on the distance between topics inside a session, also the proposed method uses fixed threshold for simplicity reasons.
+% 30 minutes
+A state of art contribution is described on \cite{jiang2018} that using the \textit{LastFM} and \textit{KKBOX} datasets, they address a solution on user identification on shared accounts at streaming platforms given its history logs, proposing the novel unsupervised learning SHE-UI, they could be able to identify groups of users sharing a same account, bringing their solution to an user-level recommendation domain instead of account-level, however, there is a pre-processing step on the stream of items that split sessions based on 30 minutes user inactivity and not based on its content, so people using the same account on different computers with IP obfuscation techniques wouldn't be taken into account for example.
 
-\cite{10.1145/2792838.2800170} proposes a top-N recommender system for solving account sharing problems, three common problems are categorized and solved:
+
+\section{Time-decay models}
+
+% time-decay, time window de 30 minutos
+A common method on recommender systems for defining subsets from stream data is introducing decaying weights on items in respect to time, \cite{sottocornola2018} addresses the absence of session delimitation, their technique introduce a time sliding window, they deal with data sparsity using the hibrid approach, combining both CF and CB; they delimit each session using fixed 30 minutes like other methods, this fixed threshold approach however, cannot detect users swapping the account usage in less than the fixed time threshold, even if there were two users are in separated ip addresses, taking this into account could be a privacy violation, or even in some places, using ip addresses to distinguish users can be an inoquous alternative when VPNs are overly used.
+
+% sliding window, uses 150 items for simplicity, uses time-decay
+Some methods proposes RNNs in order to extract features from  items, one of them is \cite{zhang2019} that proposes dynamic attention-integrated neural network (DAINN) for news recommendations, DAINN network is used to extract item semantic embeddings and they join user long-term interests with user behavior sequence patterns, their method showed a slightly improvement against other methods. However, they use a fixed time window of 150 items to create the short-term user profile,
+
+\section{Profile based models}
+
+% Session split based on sliding window number of pages
+On \cite{jindal2020} et al, they propose a dynamic threshold heuristic based on user behaviour history, their discoveries show that short time user navigation are more often and less correlated than longer ones, making them easier to categorize and achieving a higher accuracy. However, this method apply a threshold into the user behaviour pattern, and differently, this work relies on the distance between topics inside a session, also the proposed method uses fixed threshold for simplicity reasons.
+
+\cite{zhang2012} addressed the problem of account sharing and modeled an algorithm for identifying movie ratings from individual users sharing an account. It is used a model of union of linear subspaces for spotting shared accounts and a model of clustering for user identification per account. This algorithm has good accuracy on most cases, showing that it is possible to identify a distinction from each user based on item category and action, however, this algorithm is restricted for explicit recommendation systems and movie datasets tend to be smaller in size and category amount in comparison to other media datasets.
+
+A problem that e-commerce recommendation systems face is when an advertisement of an exact size or individual characteristic for an user is required, because other users may end up contaminating the account history and spoiling the estimate of these unique attributes or sizes, on \cite{sembium2018} the problem is discussed using Amazon.com e-commerce, instead of dealing with each account as a specific user and single profile, they propose a multi-persona approach boosting the accuracy, however, this method does not work well on products that have a high variability on its characteristics and it was only applied on an e-commerce platform, where there is a high repeatably of items.
+
+% does not use sessions, it uses user ratings
+\cite{verstrepen2015} proposes a top-N recommender system for solving account sharing problems, three common problems are categorized and solved:
 \begin{itemize}
     \item \textbf{Generality problem} is when the recommended item is the mean of all user items, being uninteresting for none of the users.
     \item \textbf{Dominance problem}, happens when few users use the system more than the others, in that case most of items are related to those few users.
@@ -195,11 +244,11 @@ On \cite{JINDAL2020} et al, they propose a dynamic threshold heuristic based on 
 \end{itemize}
 
 This model uses binary positive-only feedback as items and besides they used movie ratings datasets, their model probably can be used on implicit recommendation systems because they share the binary feedback model between user and items.
-Their approach uses normalized cosine similarity with KNN \cite{oro28327} to produce the account-item score recommendation matrix, then they introduce their novel DAMIB-COVER algorithm that solves the generality problem by differentiating scores between a big sum of few similarities and a small sum of a lot similarities from users in a same account.
+Their approach uses normalized cosine similarity with KNN \cite{fix1951} to produce the account-item score recommendation matrix, then they introduce their novel DAMIB-COVER algorithm that solves the generality problem by differentiating scores between a big sum of few similarities and a small sum of a lot similarities from users in a same account.
 
-One of the state of art contribution is from \cite{Jiang:2018:IUB:3209978.3210054} that using the \textit{LastFM} and \textit{KKBOX} datasets, they address a solution on user identification on shared accounts at streaming platforms given its history logs, proposing the novel unsupervised learning named SHE-UI. They could be able to identify groups of users sharing a same account, bringing their solution to an user-level recommendation domain instead of account-level.
-A problem that e-commerce recommendation systems face is when an advertisement of an exact size or individual characteristic for an user is required, because other users may end up contaminating the account history and spoiling the estimate of these unique attributes or sizes, on \cite{10.1145/3178876.3186149} et al the problem is discussed using Amazon.com e-commerce, instead of dealing with each account as a specific user and single profile, they propose a multi-persona approach boosting the accuracy, however, this method does not work well on products that have a high variability on its characteristics.
+The problem of cross-domain along with account sharing is well addressed on \cite{ma2019} that proposes a \textit{Sequential Recommendation System}, they use a a sequence encoder in each domain to update the recommendation state when each item arrives, along with this there is a \textit{shared account filter unit (SFU)} on each domain to recognize the weight of each user from an arrived item, those informations are exchangeable between each domain, where the final prediction is calculated by a \textit{cross-domain transfer unit (CFU)} that takes into account other domains \textit{SFUs}. Differently from described related works, pi-net is not session-based nor explicitly time-decay based, however, since the SFU unit and its sequence encoder is actually some kind of linked RNNs unit, there is an implicit time decay, since when new items arrive they tend over time to fade the impact of older items when modifying RNNs internal weights, along with this fact, their method is restricted to TV domains and they do not address news articles.
 
+% Não depende do conceito de sessões de uso. Além disso, aplica-se a um domínio específico, que é o de conteúdos de TV
 
 % =======================================================================
 
@@ -228,24 +277,24 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
     
         This process should use only the item content or category as parameters, being blind to the user ids or timestamps.
         
-        Time-based sessions are the most commonly used as consensus as a method for example at \cite{10.1145/3184558.3191582} it is used a defined session trough a fixed time, but the way they make it flexible, were by using a decaying time-based weight into the session items, they used this approach to overcome the short life-span of news. At the proposed method, since not the news itself, but it's topic, the short life-span problem wasn't expected to be relevant enough.
+        Time-based sessions are the most commonly used as consensus as a method for example at \cite{sottocornola2018} it is used a defined session trough a fixed time, but the way they make it flexible, were by using a decaying time-based weight into the session items, they used this approach to overcome the short life-span of news. At the proposed method, since not the news itself, but it's topic, the short life-span problem wasn't expected to be relevant enough.
     
         \subsection{Data scarcity and sparcity} \label{data_scarcity_and_sparcity}
-        \textbf{Cold start problem.} This flaw is addressed mostly to \textit{content-based} recommendation systems, since it is content-centric, when an user is fresh and he has little or no content history, the method lacks on precision resulting on spurious extrapolations.
+        \textbf{Cold start problem.} This flaw is addressed mostly to \textit{collaborative filtering} recommendation systems, since it is content-centric, when an user is fresh and he has little or no content history, the method lacks on precision resulting on spurious extrapolations.
     
-        A \textit{collaborative-based} system is no different in terms of this flaw, but it is more resistant since it collaboratively uses content history from other users, it can fill the gap against data scarcity from fresh users.
+        A \textit{content-based} system is no different in terms of this flaw, but it is more resistant since it uses content history, it can fill the gap against data scarcity from fresh users.
         
         % TODO sugestão: refazer as primeiras métricas com 200 items também.
         In order to avoid this dilemma, the proposed metrics are based on previously filtered sessions, where the first method use sessions with more than 10 items, and the second method, more than 200 items.
     
-        \textbf{Curse of dimensionality Problem.} Since content analysis and classification requires a complex analysis that generates great amounts of features/dimensions and usually recommendation systems data are sparse, the curse of dimensionality \cite{10.1093/imamat/24.1.59} is very relevant as a problem because usually any media content should be translated into a multi dimensional space before the classification, contributing to a crescendo \textit{curse of dimensionality}.
+        \textbf{Curse of dimensionality Problem.} Since content analysis and classification requires a complex analysis that generates great amounts of features/dimensions and usually recommendation systems data are sparse, the curse of dimensionality \cite{marimont1979} is very relevant as a problem because usually any media content should be translated into a multi dimensional space before the classification, contributing to a crescendo \textit{curse of dimensionality}.
 
-        
+    \newpage
     \section{Algorithms} \label{algorithms}
     
     On this section, all the datasets and used algorithms will be described as well as it historic evolution against their pioneers.
         
-    \textbf{Principal Component Analysis} \cite{hotelling:33}  is the first known form of dimensionality reduction for multidimensional data. The pinnacle of the technique is mapping from all dimensions two linear combinations which have the biggest statistical significance, or in other terms, mapping on two dimensions which have maximized variance between all others.
+    \textbf{Principal Component Analysis} \cite{hotelling1933}  is the first known form of dimensionality reduction for multidimensional data. The pinnacle of the technique is mapping from all dimensions two linear combinations which have the biggest statistical significance, or in other terms, mapping on two dimensions which have maximized variance between all others.
     
     If you have \(n\) dimensions and \(m\) items where each item has its own coordinate, PCA would translate this \(m \times n\) space matrix into another rotated \(m \times n\) matrix trough linear operations into each dimension, those new translated dimensions are called \textit{principal components}.
     Their rotation is in fact a linear combination between two original dimensions which have its variance maximized using \textit{Least Squares Regression}.
@@ -253,13 +302,13 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
     The \textit{principal components} end up ordered based on their variance from its span, they are the eigen vectors positioned on the diagonal of the resulting matrix and the rank of \textit{principal components} based on its variance is called \textit{scree-plot}.
 
     However, \textit{Principal component analysis} is the naive approach for data dimensionality reduction, but it is very useful when data have information linked trough linear relationships.
-    A successful and recent example of PCA use is this physical engine in \cite{10.1145/3309486.3340245}, that before a complex process of vector computation for physics simulation, a PCA was used to reduce the statistical irrelevance creating a meaningful and denser subspace in terms of significant information before training a neural network, making the algorithm 10X faster and using less memory.
+    A successful and recent example of PCA use is this physical engine in \cite{holden2019}, that before a complex process of vector computation for physics simulation, a PCA was used to reduce the statistical irrelevance creating a meaningful and denser subspace in terms of significant information before training a neural network, making the algorithm 10 times faster and using less memory.
     
-    At Globo dataset, as \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331} mentions, they could not provide the news content due to its closed source policy, however, they released a matrix of features where each news was represented by an array of 255 features, also they mention in their article that tSNE would translate to a better representation of the reduced data, since this matrix have non-euclidean information relationships, so in that case, PCA would not fit the best 2-dimensional surface in terms of statistical significance.
+    At Globo dataset, as \cite{moreira2018} mentions, they could not provide the news content due to its closed source policy, however, they released a matrix of features where each news was represented by an array of 255 features, also they mention in their article that tSNE would translate to a better representation of the reduced data, since this matrix have non-euclidean information relationships, so in that case, PCA would not fit the best 2-dimensional surface in terms of statistical significance.
     % Estou pensando em remover esta explicação abaixo
     To think what would happen using a excessively linear algorithm like PCA to find the best surface, imagine a zig-zagged bent bread and you want to cut the middle of it with a knife, PCA would make a straight line cut ignoring the format of the bread. In that case, the algorithm they recommend is tSNE, a modern and state-of-art technique for dimensional reduction that uses machine learning and gradient descend techniques.
     
-    \textbf{tSNE (t-distributed stochastic neighbor embedding)} also maps highly dimensional data into a low dimensional representation resuming the data and resisting against dimensionality curse as mentioned \cite{10.1093/imamat/24.1.59}, but differently from PCA, tSNE \cite{vanDerMaaten2008} is a non-linear method, this method preserves local geometry and deform global geometry, more specifically, it tends to clump points that share a near neighborhood making the clusters more evident.
+    \textbf{tSNE (t-distributed stochastic neighbor embedding)} also maps highly dimensional data into a low dimensional representation resuming the data and resisting against dimensionality curse as mentioned \cite{marimont1979}, but differently from PCA, tSNE \cite{maaten2008} is a non-linear method, this method preserves local geometry and deform global geometry, more specifically, it tends to clump points that share a near neighborhood making the clusters more evident.
     Non-linear means that if you have highly dimensional data that has a geometric representation of a curvy non-convex surface of points, for example, PCA due to its linearity would make a straight cut into this curve finding straight planes and never really fitting into the curvy surface, PCA has its algorithms variances that reduce its problems, like the Kernel PCA, but tSNE is considered to be the state-of-art for reasons below.
 
     tSNE It is a sequel of SNE (Stochastic Neighborhood embedding), but because the current distribution from SNE not only hardly clump the points close to each other but it is use to be computationally slow, because of the use of exponentiation when calculating the distribution equation.
@@ -286,7 +335,7 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
         \label{fig:affinity_twins}
     \end{figure}
     
-    \textbf{Matrix Factorization.} Netflix is known for it's competitions for collaborative filters algorithms, in 2008 \textit{matrix factorization} \cite{10.5555/1087620} was used and achieved a huge breakthrough in collaborative filtering algorithms, and it is like the prime factors for grown ups, using matrices as factors instead of just scalar numbers, it is a useful mechanism to separate the users-items matrix into a items' matrix and a users' matrix, that their multiplication result in the original users-items matrix, results into Item X User original association matrix that each item is the relation of one user to a single item.
+    \textbf{Matrix Factorization.} Netflix is known for it's competitions for collaborative filters algorithms, in 2008 \textit{matrix factorization} \cite{srebro2004} was used and achieved a huge breakthrough in collaborative filtering algorithms, and it is like the prime factors for grown ups, using matrices as factors instead of just scalar numbers, it is a useful mechanism to separate the users-items matrix into a items' matrix and a users' matrix, that their multiplication result in the original users-items matrix, results into Item X User original association matrix that each item is the relation of one user to a single item.
     The usefulness of this factorization, is that since the original matrix is sparse, you can fill the missing values by making inferences on the factorized data, because not every user in its history has real relationship with every item.
     An optimal way of doing so is by using the \textit{Alternate Least Squares} algorithm explained below that uses  \textit{Gradient Descent} as convergence algorithm.
     
@@ -302,14 +351,14 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
     For both tSNE and Affinity propagation \(sklearn\) library was the choice.
         
         \subsection{Applying Dimensionality reduction}
-        Because Globo news text data is closed source, \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331} made available the trained article embeddings data \footnote{https://www.kaggle.com/gspmoreira/news-portal-user-interactions-by-globocom} generated from its unique \textit{CHAMALEON} RNN-based algorithm. The embedding file consists into a matrix of 250 dimensions of features and 364,047 news articles, those features are a representation of the content for each respective news article.
+        Because Globo news text data is closed source, \cite{moreira2018chameleon} made available the trained article embeddings data \footnote{https://www.kaggle.com/gspmoreira/news-portal-user-interactions-by-globocom} generated from its unique \textit{CHAMALEON} RNN-based algorithm. The embedding file consists into a matrix of 250 dimensions of features and 364,047 news articles, those features are a representation of the content for each respective news article.
     
         On the proposed method only the following data and respective embedding were considered: \textit{click\_timestamp, article\_id} and \textit{{}user\_id}.
         
     
         Since on their work tSNE was mentioned as a good method for dimensionality reduction, tSNE was applied on the embedding, resulting into a pair of coordinates \(X, Y\) for each article id as the dataframe sample below:
         
-        \begin{table}[!ht]
+        \begin{table}[H]
             \centering
             \begin{tabular}{ |c|c|c| } 
                 \hline
@@ -326,16 +375,18 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
             \label{tab:tsne_results}
         \end{table}
         
+        \newpage
+        
         \subsection{Applying Clustering}
         At this step, \textit{Affinity propagation} is applied on the tSNE result data plane, several damping parameters were tested and presented further at the error metrics section. 
-        After the clustering, each cluster center point into the resulting plane receives a human-readable label, as shown on table \ref{tab:labeled_clusters} example, also, chart \ref{fig:belford} shows the distribution of consumed topics by a sampled user resembling a Benford's law distribution:
+        After the clustering, each cluster center point into the resulting plane receives a human-readable label, as shown on table \ref{tab:labeled_clusters} example, also, chart \ref{fig:benford} shows the distribution of consumed topics by a sampled user resembling a Benford's law distribution:
         
         
         \begin{table}[H]
             \centering
                 \begin{tabular}{ |c|c|c| } 
                 \hline
-                x & y & label \\
+                x & y & topic \\
                 \hline 
                 ... & ...  & ... \\
                 19.699291 & -28.117729 & tangerine-events \\ 
@@ -350,25 +401,25 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
         
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.8\textwidth]{images/belford.png}
+            \includegraphics[width=0.8\textwidth]{images/benford.png}
             \caption{Topic frequencies from a sampled user}
-            \label{fig:belford}
+            \label{fig:benford}
         \end{figure}
 
 % =======================================================================
 
 \chapter{Results} \label{results}
 
-    Here there will be a comparison between \(euclidean\ distance\) threshold against \(alternate\ least\ square\) methods and its parameters variations, different combinations of items and sessions were performed like the impact of ordering or shuffling items by timestamp, different affinity propagation damping factors and different sizes of sessions.
+    Here there will be a comparison between \(euclidean\ distance\) threshold against \(alternate\ least\ square\) methods and its parameters variations, different combinations of items and sessions were performed like the impact of temporal ordering or shuffling items by timestamp, different affinity propagation damping factors and different sizes of sessions.
     
-    On section \ref{globo_dot_com_dataset} Globo dataset properties are presented, on \ref{euclidean_distance_heuristic}, section \ref{session_simulation} the simulation of sessions as metric method is adressed with its results and on \ref{affinity_propagation_results} heatmaps from iterations are shown.
+    On section \ref{globo_dot_com_dataset} Globo dataset properties are presented, on \ref{euclidean_distance_heuristic}, section \ref{session_simulation} the simulation of sessions as metric method is adressed with its results and on \ref{affinity_propagation_results} error heatmaps from iterations are shown.
 
     % TODO como foi separado test data vs non-test data, foi seguido o mesmo método do Zhang 1/4 vs 3/4??
     % TODO talvez seja interessante uma seção de performance(precision and recall) e limites do algoritmo (e do método de clusterização)
     % TODO seção pode ser chamada apenas de Datasets
-    \section{Globo.com dataset} \label{globo_dot_com_dataset}
+    \section{Dataset} \label{globo_dot_com_dataset}
     %TODO contextualização disso nesse capítulo
-    It is a collection that consists on the following:
+    The dataset of choice was globo.com news dataset, it is a collection that consists on the following:
     \begin{itemize}
         \item approximately 2.8 millions news clicks
         \item more than 300 thousand users
@@ -376,16 +427,19 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
         \item 250 dimensional feature matrix
     \end{itemize}
     
-    Since the availability of articles text data were not allowed by the company by commercial reasons, at \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331} presented CHAMELEON, a RNN algorithm for feature extraction, and together with the dataset, they allowed the use of an feature embedding file extracted from its novel algorithm. Every news from the dataset have its own 250 feature dimensions on the embedding matrix
+    Since the availability of articles text data were not allowed by the company by commercial reasons, at \cite{moreira2018chameleon} presented CHAMELEON, a RNN algorithm for feature extraction, and together with the dataset, they made available a feature embeddings file extracted from its novel algorithm. Every news from the dataset have its own 250 feature dimensions on the embedding matrix
     
     The dataset consists on the following data for each click as the columns:
-    \newline \textit{user\_id, session\_id, session\_start, session\_size, click\_article\_id, click\_timestamp,}
-    \newline \textit{click\_environment, click\_deviceGroup, click\_os, click\_country, click\_region,}
-    \newline \textit{click\_referrer\_type} 
-
-    sample showed on the table below
     
-    \begin{table}[!ht]
+    \(user\_id, session\_id, session\_start, session\_size, click\_article\_id,\) 
+    
+    \(click\_timestamp, click\_environment, click\_deviceGroup, click\_os, \)
+    
+    \(click\_country, click\_region, click\_referrer\_type \)
+
+    However session attributes such as \(session\_id, session\_start\) and \(session\_size\) are presented in the dataset, they were not considered on this session split method since they would conflict with the timeless nature approach, the only columns considered were \(click\_timestamp, user\_id\) and \(article\_id\) along with article embeddings; dataset sample is showed on the table below:
+    
+    \begin{table}[H]
         \centering
         \begin{tabular}{ |c|c|c|c|c|c|c|c|c|c| } 
             \hline
@@ -403,8 +457,8 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
     \end{table}
 
 
-    \section{Euclidean Distance as threshold} \label{euclidean_distance_heuristic}
-    The chosen method for finding session boundaries was based on the will that users tend to encircle same or similar topics, similarly as shown on chart \ref{fig:belford}, on that sense, this hypothesis was used to create a model using euclidean distance from topics to measure how different they are.
+    \section{Evaluation metric} \label{euclidean_distance_heuristic}
+    The chosen method for finding session boundaries was based on the will that users tend to encircle same or similar topics, similarly as shown on chart \ref{fig:benford}, on that sense, this hypothesis was used to create a model using euclidean distance from topics to measure how different they are.
     
     \begin{definition}
     In a session \(S\) with a set of items \(i_{1}, i_{2}, ...\) that each item has a \textit{topic} \(t\) associated, where each \textit{topic} \(t\) has a known coordinate \(x, y\) in a Cartesian plane.
@@ -413,15 +467,18 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
     \end{definition}
 
     
-    The error metrics from cutoff heuristic was used as follow:
+    The error metrics from cutoff heuristic is defined as follow:
     
         
         \begin{itemize}
             \item The cutoff \(c\) is a row index that belongs to one of the sessions, this index is found by the cutoff trigger heuristic at definition \ref{euclidean_distance_threshold_definition}
             \item Because the two sessions doesn't have the same amount of items, thus asymmetric, a normalization mapping of the error metric is performed, the normalization effect is described on a gray color scale on table \ref{tab:cutoff_table}.
-            \item It is calculated the difference between the number of items from the inferred index(found by heuristic) and the perfect index(the real cutoff) and divided by the total number of items at the artificial session (made by two real sessions), as represented above in the gray-colored table by the error column:
+            \item It is calculated the difference between the number of items from the inferred index(found by heuristic) and the perfect index(the real cutoff) and divided by the total number of items at the artificial session (made by two real sessions), as represented above in the gray-colored table \ref{tab:cutoff_table} by the error column.
             
-            \begin{table}[!ht]
+            So in this example, the index 3 is the perfect cutoff, representing the real threshold between the two sessions, the picked index by the cutoff heuristic will receive the respective error from its index row.
+        \end{itemize} 
+        
+                    \begin{table}[H]
                 \centering
                 \begin{tabular}{c|c|c}
                     \hline
@@ -453,18 +510,15 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
                 \caption{Error normalization map from desired cutoff index}
                 \label{tab:cutoff_table}
             \end{table}
-            
-            So in this example, the index 3 is the perfect cutoff, representing the real threshold between the two sessions, the picked index by the cutoff heuristic, will receive the respective error from its index row.
-        \end{itemize} 
 
-        \section{Sessions simulation} \label{session_simulation}
+        \section{Session simulation} \label{session_simulation}
         Because the dataset already have labeled the respective \textit{user id} in each row, it was considered that the most part of accounts were in fact from individual users, in that case, it is assumed that even if some users really share the same account, this would be statistically irrelevant when analyzing the whole dataset.
         Considering this scenario true, the simulated sessions is constructed as a concatenation of two streams of two separated user ids 
         as addressed on table \ref{session_simulation} a sample from a simulated session.
         
         Notice that the column \textit{distance} stands for euclidean distance from current centroid of row index \(n\) and centroid from row index \(n - 1\) in a simulated session table.
         
-        \begin{table}[!ht]
+        \begin{table}[H]
             \centering
             \begin{tabular}{ |c|c|c|c|c|c| } 
                 \hline
@@ -485,19 +539,19 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
             \label{tab:session_simulation}
         \end{table}
         
-        \section{Temporal ordering factor} \label{temporal_ordering_factor}
+        \section{Temporal desambiguation} \label{temporal_ordering_factor}
         
         Since time ordering can be sensitive for news articles a method to disambiguate the influence of temporal order was introduced because the objective of this work is to segregate sessions exclusively on its content excluding time factor for example.
         
         There were two different types of measurements, one of them had time ordering were each user session had its items ordered by its timestamp, on the second one, the items were completely shuffled, removing time influence.
         
-        A floor cutoff euclidean distance was pick as 1, and the ceiling as 60, with this limits defined, 15 linearly spaced cutoff distances were generated as input as shown by columns \textit{cutoff dist} on table \ref{tab:cutoff_timestamp_ordered_shuffled}, for each session cut attempt, an error were calculated and attributed as section \ref{euclidean_distance_heuristic} describes, an array of error metrics was created and an \textit{error mean} and also an \textit{error standard deviation}, described on second and third column of table \ref{tab:cutoff_timestamp_ordered_shuffled}.
+        A floor cutoff euclidean distance was pick as 1, and the ceiling as 60, the origin of those numbers is related to the scale of de tSNE plot addressed on figure \ref{fig:tsne_plot}. With this limits defined, 15 linearly spaced cutoff distances were generated as input as shown by columns \textit{cutoff dist} on table \ref{tab:cutoff_timestamp_ordered_shuffled}, for each session cut attempt, an error were calculated and attributed as section \ref{euclidean_distance_heuristic} describes, an array of error metrics was created and an \textit{error mean} and also an \textit{error standard deviation}, described on second and third column of table \ref{tab:cutoff_timestamp_ordered_shuffled}.
         
-        Looking on both mean and std metrics, it has a neat meaning that time order does not affect the euclidean threshold heuristic, however, it is important to notice the high error mean (more than 0.5), furthermore, the results shows that the lower the error mean, the higher the std by a significant factor rising considerably the \textit{coefficient of variation} (\(std \div mean\) ), thus making it less reliable. For example, on table \ref{tab:cutoff_timestamp_ordered_shuffled}, notice that on the table with time ordering, the lowest error mean is 0.611 and its standard deviation mean is 0.3 or in other words, a deviation of 30 \%, making this cutoff parameter unreliable for the session cutting purpose.
+        Looking on both mean and std metrics result, it has a neat meaning that time order does not affect the euclidean threshold heuristic, however, it is important to notice the high error mean (more than 0.5), furthermore, the results shows that the lower the error mean, the error standard deviation rises considerably, thus making it less reliable. For example, on table \ref{tab:cutoff_timestamp_ordered_shuffled}, notice that on the table with time ordering, the lowest error mean is 0.611 and its standard deviation mean is 0.3 or in other words, a deviation of 30 \%, making this cutoff parameter unreliable for the session cutting purpose.
         
-        \begin{table}[ht!]
+        \begin{table}[H]
         \centering
-        \subfloat{
+        \subfloat[\label{ordered}]{
             \begin{tabular}{ |c|c|c| } 
                 \hline
                 cutoff dist. & error mean & error std \\
@@ -521,7 +575,7 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
             \end{tabular}
         }
         \rule{1cm}{0cm}
-        \subfloat{
+        \subfloat[\label{shuffled}]{
             \begin{tabular}{ |c|c|c| } 
                 \hline
                 cutoff dist. & error mean & error std \\
@@ -544,75 +598,96 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
                 \hline
             \end{tabular}
         }
-        \caption{Error metrics, session ordered by timestamp(left) vs shuffled(right)}
+        \caption{Error metrics, session ordered by timestamp \ref{ordered} vs shuffled \ref{shuffled} }
         \label{tab:cutoff_timestamp_ordered_shuffled}
         \end{table}
     
-    \newpage
     \section{Affinity propagation damping factor} \label{affinity_propagation_results}
         Another possibility for interference on session cuts performance can be the granularity of clustering, or in other words, how specific or generic that a topic classification should be so that it is enough to recognize the difference between users sharing an account? 
         
         In a single topic like Math, many areas can be classified like algebra, calculus, statistic and so on, at the same time, you can be more generic, and simply address that all those areas are simply Math, and then you segregate other topics as Portuguese, Biology, Math and so on without opening into details.
         
-        Since the \textit{damping factor} from the Affinity Propagation Algorithm described on section \ref{algorithms} changes the amount of classified clusters, another parameter was introduced on the error metrics calculations and that being the \textit{damping factor}. For different damping factors, the amount of topics is addressed on table \ref{tab:damping_factor}
-        
+        Since the \textit{damping factor} from the Affinity Propagation Algorithm described on section \ref{algorithms} changes the amount of classified clusters, another parameter was introduced on the error metrics calculations and that being the \textit{damping factor}. For different damping factors, the amount of topics is addressed on table \ref{tab:damping_factor}.
+
         \begin{table}[H]
             \centering
+            \begin{small}
                 \begin{tabular}{ |c|c| } 
-                \hline
-                damping & nº of clusters \\
-                \hline 
-                0.5 & 4771 \\ 
-                0.553 & 4716 \\ 
-                0.606 & 2984 \\
-                0.66 & 1146 \\
-                0.766 & 91 \\
-                0.82 & 152 \\
-                \hline
+                    \hline
+                    damping & nº of clusters \\
+                    \hline 
+                    0.5 & 4771 \\ 
+                    0.553 & 4716 \\ 
+                    0.606 & 2984 \\
+                    0.66 & 1146 \\
+                    0.766 & 91 \\
+                    0.82 & 152 \\
+                    \hline
                 \end{tabular}
+                \end{small}
             \caption{damping factor effect on nº of clusters}
             \label{tab:damping_factor}
         \end{table}
         
-        Similarly as section \ref{temporal_ordering_factor} a number of 15 cutoff values were tested between values 1 and 60, linearly spaced for each iteration with a different cutoff . The output was a vector of error values of the same size of the simulated sessions(one for each session, about 32 thousand sessions).
+        Similarly as section \ref{temporal_ordering_factor} a number of 15 cutoff values were tested between values 1 and 60, linearly spaced for each iteration with a different cutoff . The output was a vector of error values of the same size of the simulated sessions (one for each session, about 32 thousand sessions).
         Then, from this error vector, it was calculated its mean and standard deviation for each iteration (15 iterations), so that we could measure its reliability and precision.
         
-        The heatmaps error results are interpreted as the following:
+        The error heatmaps results are interpreted as the following:
         \begin{itemize}
             \item The Vertical axis of the represents the affinity propagation damping factor
             \item The Horizontal axis corresponds to the chosen cutoff distance threshold
             \item the value of each item on the heatmap corresponds to one of two metric errors: Mean error, Standard deviation error.
         \end{itemize}
     
-        The objective of this metric is finding a lower than 50\% mean error and the lowest \textbf{coefficient of variation} (\(std \div mean\) ). 
+        The objective of this metric is finding a lower than 50\% mean error and the lowest \(standard\ deviation\).
         
         % TODO explicar resultados, foram bons? foram ruins?
-        \begin{figure}[H]
+        \begin{figure}[htp]
             \centering
             \includegraphics[width=0.95\textwidth]{images/error_mean.png}
             \caption{Error mean heatmap}
             \label{fig:error_mean_heatmap}
         \end{figure}
         
-        \begin{figure}[H]
+        \begin{figure}[htp]
             \centering
             \includegraphics[width=0.98\textwidth]{images/error_std.png}
             \caption{Error standard deviation heatmap}
             \label{fig:error_std_heatmap}
         \end{figure}
     
-    \section{Applying alternate least squares}
-        \subsection{Method}
-        In order to avoid cold start, only users with more than 200 items in total were chosen.
-        Like in the Euclidean Distance experiment, fictitious sessions were created, but instead of distance column as error metric, a new column 'prediction' were added that corresponds to the predicted probability that one user have to read that article, the chosen user is the user of the first session.
+    \newpage     
+    \section{Alternate least squares comparison}
         
+        The last attempt to verify the reliability of the session cutoff method was using topic read frequency per user and feeding into an ALS implicit recommender system using \textit{pyspark}, mentioned on section \ref{technology_usage}, creating a list of sets \((user\_id, topic\_alias, read\_frequency)\) as shown on table \ref{tab:als_read_frequency}. Later, data was split into 25\% / 75\% train vs test data and the ALS model was trained.
+        
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{ |c|c|c| } 
+                \hline
+                user\_id & topic\_alias & read\_frequency \\
+                \hline 
+                ... & ... & ... \\
+                26340 & purple-articles & 7 \\ 
+                26340 & rose-stories & 5 \\ 
+                58277 & cyan-contents & 1 \\ 
+                ... & ... & ... \\
+                \hline
+            \end{tabular}
+            \caption{ALS: Read frequency per topic}
+            \label{tab:als_read_frequency}
+        \end{table}
+        
+        In order to avoid cold start, only users with more than 200 items in total were chosen.
+        Same as Euclidean Distance experiment on \ref{euclidean_distance_heuristic}, fictitious sessions were created, but instead of a distance column as error metric, a new column 'prediction' were added that corresponds to the predicted probability that the probe \(user\_id\) is likely to read that article.
 
-        The expected result is that, on the first session, the prediction should have low standard deviation and a high mean, and on the second session, using the firsts session user\_id, as prediction parameter, the expected mean, in case of different user styles, should be lower and also the standard deviation.
+        The next step relies on making a cross probing between a pair of user sessions each time, so in a session from \(user\_id = 413\), the predicted probability for each item is calculated for \(user\_id = 45502\), than it is calculated the \textit{mean} of all predictions as well as its \textit{standard deviation} as shown on second line of table \ref{tab:alternate_least_squares_metrics}, lastly, the process is repeated with the \(user\_id = 413\) against itself. The expectation of this experiment is that the prediction\_mean of an user session comparing against itself should be high at majority of times with low \textit{standard deviation} and for the second user session against the first one, the prediction\_mean for the second user against the first should be at some median value with high \textit{standard deviation}, meaning less correlation.
+        
+        However, looking at table \ref{tab:alternate_least_squares_metrics} there seems to be no relevant difference between the \textit{prediction means} and \textit{prediction standard deviations}, meaning that results from previous steps or even the embeddings could be faulty at some point.
+
         
         \newpage 
-        
-        % TODO subseção com apenas 1 parágrafo
-        \subsection{Alternate Least Squares Error Metrics}
+
         The following table was created as result, it was extracted metrics from 413 users.
         \begin{table}[H]
             \centering
@@ -661,11 +736,13 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
 % =======================================================================
 
 \chapter{Conclusion}
-The standard deviation presented on the heatmaps with different input parameters reveals that the euclidean distance as threshold method does not have enough precision, but these results could have many explanations for this lack of precision not only from the method itself. Since globo dataset is closed source and the features available from \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331} were created from his own algorithm, a certain level of belief was implied that the features really reflected its content and his algorithm worked well on quantitatively describing them.
+% Given the event-driven nature of news
+The error standard deviation presented on the heatmaps with different input parameters reveals that the euclidean distance as threshold method does not have enough precision, but these results could have many explanations not only from the method itself. Since globo dataset is closed source and the embedding features available from \cite{moreira2018chameleon} were created from his own algorithm, a certain level of belief was implied that the embeddings really reflected its content and his algorithm worked well on quantitatively describing them.
 
-Another possible cause could be the dimensionality reduction step, no other algorithm was tested but the recommend tSNE from \cite{deSouzaPereiraMoreira:2018:CDL:3240323.3240331}.
+Another possible cause could be the dimensionality reduction step, no other algorithm was tested but the recommend tSNE from \cite{moreira2018chameleon}.
 
-Finally, news as a type of media have a chaotic nature, even when readers have his preference for certain topics, unexpected and relevant news from other topics may arrive and catch the readers eyes those phenomena, maybe they are common and can hinder this method of session cut by euclidean distance threshold. 
+%TODO talk about the flaw of this method, like users with same interest sharing account 
+Finally, news as a type of media have event-driven and chaotic nature, even when readers have his preference for certain topics, unexpected and relevant news from other topics may arrive and catch the readers eyes, those phenomena are maybe common and can hinder the proposed method of sessionization by euclidean distance threshold.
 
 \bibliographystyle{packages/abntex2-alf}
 \bibliography{biblio}
