@@ -56,14 +56,14 @@ Special thanks to Carolina Nery that helped me with discussions and insights dur
 
 % TODO ponctuate the difference that you are using a content-only timeless technique
 \begin{abstract}
-  Although some content providers register stream data from its users and can track their profile style for content recommendation, when two or more users share a same account, their true profile activity is obfuscated and fuzzed, this user behavior hinders the recommendation systems from providers. This work proposes a way of classifying users' stream data trough sessions based on its media content, opening the possibility for breaking a same account profile within multiple user profiles and consequently identifying this activity. In this work dimensionality reduction and clustering methods are used to classify user stream data into sessions that correspond to each respective user profile.
+  Although some content providers register stream data from its users and can track their profile style for content recommendation, when two or more users share a same account, their true profile activity is obfuscated and fuzzed, this user behavior hinders the recommendation systems from providers, moreover, the growing concerns on user privacy poses a risk to current models that rely on unconcealed user identity. This work proposes a way of classifying users' stream data trough sessions, based only on its media content, opening the possibility for breaking a same account profile within multiple user profiles and consequently identifying this activity. In this work dimensionality reduction and clustering methods are used to classify user stream data into sessions that correspond to each respective user profile.
 \end{abstract}
 
 % resumo em português
 \begin{englishabstract}{}{Redução de dimensionalidade, Clusterização, Perfis de usuários, Identificação de sessões, Sistemas de recomendações}
 
-  Embora as provedoras de conteúdos registram dados de acessos de seus usuários e consigam analisar seus perfis para recomendações de conteúdo, quando duas ou mais pessoas compartilham da mesma conta a atividade e perfil original e individual de cada usuário é obfuscada e difusa por essas contas compartilhadas, este comportamento confunde os sistemas de recomendação existentes. 
-  Este trabalho propõe uma maneira de classificar o fluxo de dados dos usuários em sessões baseando-se em seu conteúdo, abrindo portas para quebrar a mesma conta em múltiplos perfis de usuários e consequentemente identificando esta atividade. Neste trabalho Redução de dimensionalidade e métodos de clusterização são utilizados para classificar o fluxo de dados em sessões que correspondem respectivamente a cada perfil de usuário.
+  Embora as provedoras de conteúdos registram dados de acessos de seus usuários e consigam analisar seus perfis para recomendações de conteúdo, quando duas ou mais pessoas compartilham da mesma conta a atividade e perfil original e individual de cada usuário é obfuscada e difusa por essas contas compartilhadas, este comportamento confunde os sistemas de recomendação existentes, além disso, o aumento da preocupação com a privacidade dos usuários coloca em risco os modelos atuais que são dependentes de reconhecimento explícito dos usuários.
+  Este trabalho propõe uma maneira de classificar o fluxo de dados dos usuários em sessões baseando-se apenas em seu conteúdo, abrindo portas para quebrar a mesma conta em múltiplos perfis de usuários e consequentemente identificando esta atividade. Neste trabalho Redução de dimensionalidade e métodos de clusterização são utilizados para classificar o fluxo de dados em sessões que correspondem respectivamente a cada perfil de usuário.
 \end{englishabstract}
 
 \listoffigures 
@@ -72,12 +72,13 @@ Special thanks to Carolina Nery that helped me with discussions and insights dur
 \begin{listofabbrv}{SPMD}
     \item[PCA] Principal Component Analysis
     \item[SNE] Stochastic Neighbor Embedding
+    \item[SVD] Singular Value Decomposition
     \item[tSNE] t-Distributed Stochastic Neighbor Embedding
     \item[EM] Expectation-Maximization Clustering
     \item[RNN] Recurrent Neural Networks
-    \item[ALS] Alternate Least Squares    
+    \item[ALS] Alternating Least Squares    
     \item[CF] Colaborative Filtering
-    \item[CB] Content-based
+    \item[CB] Content-based Filtering
 \end{listofabbrv}
 
 \tableofcontents % sumario
@@ -97,8 +98,10 @@ On \cite{jiang2018} its main goal is identifying shared accounts in multimedia s
 The proposed work consists in two global objectives: (i) Verifying the possibility of an algorithm for session identification based on item category instead of timeout, 
 (ii) Create an evaluation method for reliably testing its accuracy and precision.
 
-\textit{globo.com} dataset offered a good amount of data, it was preferred instead of others due to it's availability and data abundance, however, since they do not allow the use of news content, \cite{moreira2018chameleon} made available its embeddings from that carries 250 dimensions of features for each of more than 300,000 articles, also \textit{globo.com} dataset aggregates streams of user clicks with more than 2.8 millions of clicks with labeled information such as user\_id and timestamp, the attribute of stream click is addressed at section \ref{globo_dot_com_dataset}.
-Dimensionality reduction technique was needed in order to reduce complexity of data and apply the \(Affinity Propagation\) clustering algorithm,
+\textit{globo.com} dataset offered a good amount of data, it was preferred instead of others due to it's availability and data abundance, however, since they do not allow the use of news content, \cite{moreira2018chameleon} made available its embeddings that carries 250 dimensions of features for each of more than 300,000 articles, also \textit{globo.com} dataset aggregates streams of user clicks with more than 2.8 millions of clicks with labeled information such as user\_id and timestamp; the attribute of stream click is addressed at section \ref{globo_dot_com_dataset}.
+Dimensionality reduction technique was needed in order to reduce complexity of data and apply the \(Affinity Propagation\) clustering algorithm. 
+
+Two main methods of evaluation are addressed, the first is an \textit{euclidean distance} based method were the distance between each article content is considered; the second evaluation method relies on \textit{matrix factorization} such as ALS technique \cite{takane1977} where read frequency from labeled news topics acts as an implicit correlation from users to items.
 
 The image below describes in general terms the pipeline of both proposals
 
@@ -116,7 +119,7 @@ Finally, on chapter \ref{results} error measurement modeling is addressed along 
 % =======================================================================
 
 \chapter{Theoretical Background} \label{theoretical_background_and_related_work}
-Here you will find the foundations, they will be introduced as well as related works, those are crucial to assemble the complete picture of this work.
+Here you will find the foundations for this work, they will be introduced as well as related works, those are crucial to assemble the complete picture.
 
 At subsection \ref{basic_concepts}, basic concepts and attributes are introduced and on subsection \ref{dimensionality_reduction} and \ref{cluster_analysis} methods and algorithms are introduced with its applicability and past usage. Related works are presented on subsection \ref{related_works}
 
@@ -287,7 +290,7 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
         % TODO sugestão: refazer as primeiras métricas com 200 items também.
         In order to avoid this dilemma, the proposed metrics are based on previously filtered sessions, where the first method use sessions with more than 10 items, and the second method, more than 200 items.
     
-        \textbf{Curse of dimensionality Problem.} Since content analysis and classification requires a complex analysis that generates great amounts of features/dimensions and usually recommendation systems data are sparse, the curse of dimensionality \cite{marimont1979} is very relevant as a problem because usually any media content should be translated into a multi dimensional space before the classification, contributing to a crescendo \textit{curse of dimensionality}.
+        \textbf{Curse of dimensionality Problem.} Since content analysis and classification requires a complex analysis that generates great amounts of features/dimensions and usually recommendation systems data are sparse, the curse of dimensionality \cite{marimont1979} is very relevant as a problem because usually any media content should be translated into a multi dimensional space before the classification, contributing to a non-ending crescendo \textit{curse of dimensionality}.
 
     \newpage
     \section{Algorithms} \label{algorithms}
@@ -337,10 +340,10 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
     
     \textbf{Matrix Factorization.} Netflix is known for it's competitions for collaborative filters algorithms, in 2008 \textit{matrix factorization} \cite{srebro2004} was used and achieved a huge breakthrough in collaborative filtering algorithms, and it is like the prime factors for grown ups, using matrices as factors instead of just scalar numbers, it is a useful mechanism to separate the users-items matrix into a items' matrix and a users' matrix, that their multiplication result in the original users-items matrix, results into Item X User original association matrix that each item is the relation of one user to a single item.
     The usefulness of this factorization, is that since the original matrix is sparse, you can fill the missing values by making inferences on the factorized data, because not every user in its history has real relationship with every item.
-    An optimal way of doing so is by using the \textit{Alternate Least Squares} algorithm explained below that uses  \textit{Gradient Descent} as convergence algorithm.
+    An optimal way of doing so is by using a modern version of \textit{Alternating Least Squares} algorithm \cite{takane1977} explained below that uses \textit{Gradient Descent} as convergence algorithm.
     
     
-    \textbf{Alternate Least Squares.} It is a faster variant of the Matrix Factorization that allows it to be computational distributed, the as matrix factorization, it has SVD as central role on the factorization between item and user matrices, but in this case, a cost function with an error function is alternated between each matrix, updating the elements of one matrix at a time, this computational behaviour reduces the complexity of the cost function and allows it to be computed in a distributed fashion.
+    \textbf{Alternating Least Squares.} It is a faster variant of the Matrix Factorization that allows it to be computational distributed, the as matrix factorization, it has SVD \cite{golub1971} as central role on the factorization between item and user matrices, but in this case, a cost function with an error function is alternated between each matrix, updating the elements of one matrix at a time, this computational behaviour reduces the complexity of the cost function and allows it to be computed in a distributed fashion.
     Today a common implementation of ALS is from Spark \(Hadoop\) in java, but also have facade libraries that allow calling ALS from spark \(Hadoop\) from other languages like Scala and Python (Pyspark).
 
     \section{Technology usage} \label{technology_usage}
@@ -348,10 +351,10 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
     It was used \(Python3\) with \textit{pandas} \cite{reback2020pandas} and \textit{numpy} as main data manipulation, \(Pyspark\) was used for ALS method recommender system. 
     \(Pyspark\) is a python library that is a facade for a java spark hadoop spark application server that uses map/reduce in order to make distributed computations.
 
-    For both tSNE and Affinity propagation \(sklearn\) library was the choice.
+    For both tSNE and Affinity propagation \textit{sklearn} library was the choice and the source code from the proposed work is available at github \footnote{github.com/zatura/clickstream-content-sessionization}
         
         \subsection{Applying Dimensionality reduction}
-        Because Globo news text data is closed source, \cite{moreira2018chameleon} made available the trained article embeddings data \footnote{https://www.kaggle.com/gspmoreira/news-portal-user-interactions-by-globocom} generated from its unique \textit{CHAMALEON} RNN-based algorithm. The embedding file consists into a matrix of 250 dimensions of features and 364,047 news articles, those features are a representation of the content for each respective news article.
+        Because \textit{Globo.com} news text data is closed source, \cite{moreira2018chameleon} made available the trained article embeddings data \footnote{kaggle.com/gspmoreira/news-portal-user-interactions-by-globocom} generated from its unique \textit{CHAMALEON} RNN-based algorithm. The embedding file consists into a matrix of 250 dimensions of features and 364,047 news articles, those features are a representation of the content for each respective news article.
     
         On the proposed method only the following data and respective embedding were considered: \textit{click\_timestamp, article\_id} and \textit{{}user\_id}.
         
@@ -379,7 +382,7 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
         
         \subsection{Applying Clustering}
         At this step, \textit{Affinity propagation} is applied on the tSNE result data plane, several damping parameters were tested and presented further at the error metrics section. 
-        After the clustering, each cluster center point into the resulting plane receives a human-readable label, as shown on table \ref{tab:labeled_clusters} example, also, chart \ref{fig:benford} shows the distribution of consumed topics by a sampled user resembling a Benford's law distribution:
+        After the clustering, each cluster center point into the resulting plane receives a random generated human-readable label with the format \textit{<random\_color-random\_substantive>}, as shown on table \ref{tab:labeled_clusters} example, also, chart \ref{fig:benford} shows the distribution of consumed topics by a sampled user resembling a Benford's law distribution:
         
         
         \begin{table}[H]
@@ -410,7 +413,7 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
 
 \chapter{Results} \label{results}
 
-    Here there will be a comparison between \(euclidean\ distance\) threshold against \(alternate\ least\ square\) methods and its parameters variations, different combinations of items and sessions were performed like the impact of temporal ordering or shuffling items by timestamp, different affinity propagation damping factors and different sizes of sessions.
+    Here there will be a comparison between \textit{euclidean distance} threshold against \textit{alternating least square} methods and its parameters variations, different combinations of items and sessions were performed like the impact of temporal ordering or shuffling items by timestamp, different affinity propagation damping factors and different sizes of sessions.
     
     On section \ref{globo_dot_com_dataset} Globo dataset properties are presented, on \ref{euclidean_distance_heuristic}, section \ref{session_simulation} the simulation of sessions as metric method is adressed with its results and on \ref{affinity_propagation_results} error heatmaps from iterations are shown.
 
@@ -657,7 +660,7 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
         \end{figure}
     
     \newpage     
-    \section{Alternate least squares comparison}
+    \section{Alternating least squares comparison}
         
         The last attempt to verify the reliability of the session cutoff method was using topic read frequency per user and feeding into an ALS implicit recommender system using \textit{pyspark}, mentioned on section \ref{technology_usage}, creating a list of sets \((user\_id, topic\_alias, read\_frequency)\) as shown on table \ref{tab:als_read_frequency}. Later, data was split into 25\% / 75\% train vs test data and the ALS model was trained.
         
@@ -729,7 +732,7 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
                 9193 & 13885 & 0.80591 & 0.2890 \\
                 \hline
             \end{tabular}
-            \caption{Alternate Least Squares measurements}
+            \caption{Alternating Least Squares measurements}
             \label{tab:alternate_least_squares_metrics}
         \end{table}
 
@@ -739,10 +742,11 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
 % Given the event-driven nature of news
 The error standard deviation presented on the heatmaps with different input parameters reveals that the euclidean distance as threshold method does not have enough precision, but these results could have many explanations not only from the method itself. Since globo dataset is closed source and the embedding features available from \cite{moreira2018chameleon} were created from his own algorithm, a certain level of belief was implied that the embeddings really reflected its content and his algorithm worked well on quantitatively describing them.
 
-Another possible cause could be the dimensionality reduction step, no other algorithm was tested but the recommend tSNE from \cite{moreira2018chameleon}.
+The ALS algorithm method evaluation showed that there were no relevant item similarity between users itself against other users, meaning that rather this is a cause of the chaotic nature of news or tSNE as dimensionality reduction wasn't precise enough to classify the different news topics.
 
 %TODO talk about the flaw of this method, like users with same interest sharing account 
-Finally, news as a type of media have event-driven and chaotic nature, even when readers have his preference for certain topics, unexpected and relevant news from other topics may arrive and catch the readers eyes, those phenomena are maybe common and can hinder the proposed method of sessionization by euclidean distance threshold.
+Finally, news as a type of media have event-driven and chaotic nature, even when readers have his preference for certain topics, unexpected and relevant news from other topics may arrive and catch the readers eyes, those phenomena are maybe common, thus, the proposed method of sessionization by euclidean distance is not a good candidate to split sessions based on its content.
+
 
 \bibliographystyle{packages/abntex2-alf}
 \bibliography{biblio}
