@@ -43,7 +43,6 @@ I am deeply grateful to my advisor, Weverton Cordeiro for his profissionalism an
 Special thanks to Carolina Nery that helped me with discussions and insights during the construction of this work.
 \end{acknowledgements}
 
-% dedicatoria
 \clearpage
 \begin{flushright}
     \mbox{}
@@ -54,16 +53,19 @@ Special thanks to Carolina Nery that helped me with discussions and insights dur
     --- \textsc{Marie Curie}
 \end{flushright}
 
-% TODO ponctuate the difference that you are using a content-only timeless technique
 \begin{abstract}
-  Although some content providers register stream data from its users and can track their profile style for content recommendation, when two or more users share a same account, their true profile activity is obfuscated and fuzzed, this user behavior hinders the recommendation systems from providers, moreover, the growing concerns on user privacy poses a risk to current models that rely on unconcealed user identity. This work proposes a way of classifying users' stream data trough sessions, based only on its media content, opening the possibility for breaking a same account profile within multiple user profiles and consequently identifying this activity. In this work dimensionality reduction and clustering methods are used to classify user stream data into sessions that correspond to each respective user profile.
+  Although some content providers register stream data from its users and can track their profile style for content recommendation, when two or more users share a same account, their true profile activity is obfuscated and fuzzed. This user behavior hinders the recommendation systems from providers, moreover, the growing concerns on user privacy poses a risk to current models that rely on unconcealed user identity. This work proposes a way of classifying users' stream data trough sessions, based only on its media content, opening the possibility for breaking a same account profile within multiple user profiles and consequently identifying this activity. In this work dimensionality reduction and clustering methods are used to classify user stream data into sessions that correspond to each respective user profile.
+  Experiments show that the event-driven nature of news content can challenge the construction of a session splitting method based exclusively on content-type without user profiling.
+    %DONE Galante: Incluir uma última frase ... Experimentos mostram que ... (dizer os melhores resultados para sinalizar que fizemos experimentos)
 \end{abstract}
 
 % resumo em português
 \begin{englishabstract}{}{Redução de dimensionalidade, Clusterização, Perfis de usuários, Identificação de sessões, Sistemas de recomendações}
 
-  Embora as provedoras de conteúdos registram dados de acessos de seus usuários e consigam analisar seus perfis para recomendações de conteúdo, quando duas ou mais pessoas compartilham da mesma conta a atividade e perfil original e individual de cada usuário é obfuscada e difusa por essas contas compartilhadas, este comportamento confunde os sistemas de recomendação existentes, além disso, o aumento da preocupação com a privacidade dos usuários coloca em risco os modelos atuais que são dependentes de reconhecimento explícito dos usuários.
-  Este trabalho propõe uma maneira de classificar o fluxo de dados dos usuários em sessões baseando-se apenas em seu conteúdo, abrindo portas para quebrar a mesma conta em múltiplos perfis de usuários e consequentemente identificando esta atividade. Neste trabalho Redução de dimensionalidade e métodos de clusterização são utilizados para classificar o fluxo de dados em sessões que correspondem respectivamente a cada perfil de usuário.
+  Embora as provedoras de conteúdos registram dados de acessos de seus usuários e consigam analisar seus perfis para recomendações de conteúdo, quando duas ou mais pessoas compartilham da mesma conta a atividade e perfil original e individual de cada usuário é obfuscada e difusa por essas contas compartilhadas. Este comportamento confunde os sistemas de recomendação existentes, além disso, o aumento da preocupação com a privacidade dos usuários coloca em risco os modelos atuais que são dependentes de reconhecimento explícito dos usuários.
+  Este trabalho propõe uma maneira de classificar o fluxo de dados dos usuários em sessões baseando-se apenas em seu conteúdo, abrindo portas para quebrar a mesma conta em múltiplos perfis de usuários e consequentemente identificando esta atividade. Neste trabalho técnicas de redução de dimensionalidade e métodos de clusterização são utilizados para classificar o fluxo de dados em sessões que correspondem respectivamente a cada perfil de usuário.
+  Experimentos mostram que a natureza guiada a eventos dos conteúdos de notícias tornam desafiador a construção de um método de quebra de sessões exclusivamente baseado em categorização de conteúdo sem perfilização de usuário.
+  %DONE Galante: Incluir uma última frase ... Experimentos mostram que ... (dizer os melhores resultados para sinalizar que fizemos experimentos)
 \end{englishabstract}
 
 \listoffigures 
@@ -101,25 +103,14 @@ The proposed work consists in two global objectives: (i) Verifying the possibili
 \textit{globo.com} dataset offered a good amount of data, it was preferred instead of others due to it's availability and data abundance, however, since they do not allow the use of news content, \cite{moreira2018chameleon} made available its embeddings that carries 250 dimensions of features for each of more than 300,000 articles, also \textit{globo.com} dataset aggregates streams of user clicks with more than 2.8 millions of clicks with labeled information such as user\_id and timestamp; the attribute of stream click is addressed at section \ref{globo_dot_com_dataset}.
 Dimensionality reduction technique was needed in order to reduce complexity of data and apply the \(Affinity Propagation\) clustering algorithm. 
 
-Two main methods of evaluation are addressed, the first is an \textit{euclidean distance} based method were the distance between each article content is considered; the second evaluation method relies on \textit{matrix factorization} such as ALS technique \cite{takane1977} where read frequency from labeled news topics acts as an implicit correlation from users to items.
-
-The image below describes in general terms the pipeline of both proposals
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{images/experiment.png}
-    \caption{Proposed validation method}
-    \label{fig:method_architecture}
-\end{figure}
-
 %TODO Está um pouco genérico, especificar alguns pontos.
-This work is organized as follow: Initially on chapter \ref{theoretical_background_and_related_work} basic concepts and methods needed to fulfil the following reasoning are introduced, later related works on chapter \ref{related_works} that backed the choices made on this project. On the chapter \ref{methodology} the session problem modelling is introduced and described as well as known problems for multidimensional data and its manipulation. The section \ref{algorithms} that follows introduce solutions for the defined problems.
-Finally, on chapter \ref{results} error measurement modeling is addressed along with it metrics results.
+This work is organized as follow: Initially on chapter \ref{theoretical_background} basic concepts and methods needed to fulfil the following reasoning are introduced, later related works on chapter \ref{related_works} that backed the choices made on this project. On the chapter \ref{methodology} the session problem modelling is introduced and described as well as known problems for multidimensional data and its manipulation. The section \ref{algorithms} that follows introduce solutions for the defined problems.
+Finally, on chapter \ref{experiments} error measurement modeling is addressed along with it metrics results.
 
 % =======================================================================
 
-\chapter{Theoretical Background} \label{theoretical_background_and_related_work}
-Here you will find the foundations for this work, they will be introduced as well as related works, those are crucial to assemble the complete picture.
+\chapter{Theoretical Background} \label{theoretical_background}
+Here you will find the foundations for this work, they will be introduced, those are crucial to assemble the complete picture.
 
 At subsection \ref{basic_concepts}, basic concepts and attributes are introduced and on subsection \ref{dimensionality_reduction} and \ref{cluster_analysis} methods and algorithms are introduced with its applicability and past usage. Related works are presented on subsection \ref{related_works}
 
@@ -202,7 +193,7 @@ At subsection \ref{basic_concepts}, basic concepts and attributes are introduced
 
 % =======================================================================
 
-\chapter{Related works} \label{related_works}
+\chapter{Related work} \label{related_works}
 There were a clear distinction between timeout, time-decay and profile-based models on account sharing and user identification related works, for that reason, they are presented as follow divided by three addressed categories as timeout, time-decay and profile-based methods.
 
 \section{Timeout models}
@@ -251,6 +242,10 @@ Their approach uses normalized cosine similarity with KNN \cite{fix1951} to prod
 
 The problem of cross-domain along with account sharing is well addressed on \cite{ma2019} that proposes a \textit{Sequential Recommendation System}, they use a a sequence encoder in each domain to update the recommendation state when each item arrives, along with this there is a \textit{shared account filter unit (SFU)} on each domain to recognize the weight of each user from an arrived item, those informations are exchangeable between each domain, where the final prediction is calculated by a \textit{cross-domain transfer unit (CFU)} that takes into account other domains \textit{SFUs}. Differently from described related works, pi-net is not session-based nor explicitly time-decay based, however, since the SFU unit and its sequence encoder is actually some kind of linked RNNs unit, there is an implicit time decay, since when new items arrive they tend over time to fade the impact of older items when modifying RNNs internal weights, along with this fact, their method is restricted to TV domains and they do not address news articles.
 
+\section{Comparative Analysis}
+% TODO: Galante Acho que seria legal uma última sessão de análise comparativa, onde você define itens de comparação e compara os trabalhos. Finaliza com um parágrafo dizendo quais são os pontos em aberto (gaps) que o seu trabalho soluciona
+    
+
 % Não depende do conceito de sessões de uso. Além disso, aplica-se a um domínio específico, que é o de conteúdos de TV
 
 % =======================================================================
@@ -291,11 +286,27 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
         In order to avoid this dilemma, the proposed metrics are based on previously filtered sessions, where the first method use sessions with more than 10 items, and the second method, more than 200 items.
     
         \textbf{Curse of dimensionality Problem.} Since content analysis and classification requires a complex analysis that generates great amounts of features/dimensions and usually recommendation systems data are sparse, the curse of dimensionality \cite{marimont1979} is very relevant as a problem because usually any media content should be translated into a multi dimensional space before the classification, contributing to a non-ending crescendo \textit{curse of dimensionality}.
-
-    \newpage
-    \section{Algorithms} \label{algorithms}
     
-    On this section, all the datasets and used algorithms will be described as well as it historic evolution against their pioneers.
+    \newpage
+    \section{Overview}
+    % DONE: Galante Eu acho que é muito detalhe para introdução. Acho que ficaria melhor se fosse a primeira seção do capítulo da metodologia. tipo "Overview"  -> Eu colocaria depois das definições como seção 4.2 (Sinalizei lá no capítulo 4)
+        Two main methods of evaluation are addressed, the first is an \textit{euclidean distance} based method were the distance between each article content is considered; the second evaluation method relies on \textit{matrix factorization} such as ALS technique \cite{takane1977} where the read frequency from labeled news topics from each user acts as a form of implicit recommendation system.
+        
+        The image below describes in general terms the pipeline of both proposals
+        
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.9\textwidth]{images/experiment.png}
+            \caption{Proposed validation method}
+            \label{fig:method_architecture}
+        \end{figure}
+    % DONE: Galante Colocar o texto que está na introdução (com a imagem)
+    
+    \newpage
+    % DONE: Galante Aqui se chamaria "Algoritmos Utilizados" ou alguma outra palavra para sinalizar para o leitor que são algoritmos de outros autores senão damos a impressão que é proposta  nossa, se for proposta nossa, precisamos colocara o algoritmo.
+    \section{Used algorithms} \label{algorithms}
+    
+    On this section, all the used algorithms will be described as well as its historic evolution against their pioneers.
         
     \textbf{Principal Component Analysis} \cite{hotelling1933}  is the first known form of dimensionality reduction for multidimensional data. The pinnacle of the technique is mapping from all dimensions two linear combinations which have the biggest statistical significance, or in other terms, mapping on two dimensions which have maximized variance between all others.
     
@@ -308,14 +319,14 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
     A successful and recent example of PCA use is this physical engine in \cite{holden2019}, that before a complex process of vector computation for physics simulation, a PCA was used to reduce the statistical irrelevance creating a meaningful and denser subspace in terms of significant information before training a neural network, making the algorithm 10 times faster and using less memory.
     
     At Globo dataset, as \cite{moreira2018} mentions, they could not provide the news content due to its closed source policy, however, they released a matrix of features where each news was represented by an array of 255 features, also they mention in their article that tSNE would translate to a better representation of the reduced data, since this matrix have non-euclidean information relationships, so in that case, PCA would not fit the best 2-dimensional surface in terms of statistical significance.
-    % Estou pensando em remover esta explicação abaixo
+    
     To think what would happen using a excessively linear algorithm like PCA to find the best surface, imagine a zig-zagged bent bread and you want to cut the middle of it with a knife, PCA would make a straight line cut ignoring the format of the bread. In that case, the algorithm they recommend is tSNE, a modern and state-of-art technique for dimensional reduction that uses machine learning and gradient descend techniques.
     
     \textbf{tSNE (t-distributed stochastic neighbor embedding)} also maps highly dimensional data into a low dimensional representation resuming the data and resisting against dimensionality curse as mentioned \cite{marimont1979}, but differently from PCA, tSNE \cite{maaten2008} is a non-linear method, this method preserves local geometry and deform global geometry, more specifically, it tends to clump points that share a near neighborhood making the clusters more evident.
     Non-linear means that if you have highly dimensional data that has a geometric representation of a curvy non-convex surface of points, for example, PCA due to its linearity would make a straight cut into this curve finding straight planes and never really fitting into the curvy surface, PCA has its algorithms variances that reduce its problems, like the Kernel PCA, but tSNE is considered to be the state-of-art for reasons below.
 
     tSNE It is a sequel of SNE (Stochastic Neighborhood embedding), but because the current distribution from SNE not only hardly clump the points close to each other but it is use to be computationally slow, because of the use of exponentiation when calculating the distribution equation.
-    % TODO show t-student formula, explain the differences in performance against gaussian model
+    
     The "t" letter stands for t-student distribution, it is computationally faster and has a less severe penalty on point agglutination due to its natural flattened curve, thus winning the "state-of-art" title due to its low cost and better precision.
 
     On figure \ref{fig:tsne_plot} there is a plot of tSNE applied on Globo dataset highly dimensional embedding that represents the content of each news, this exactly plot and its data was used on the proposed method, each point represented below is a relationship of a Xs, Ys coordinate with an article id 
@@ -411,17 +422,17 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
 
 % =======================================================================
 
-\chapter{Results} \label{results}
+\chapter{Experiments} \label{experiments}  
 
-    Here there will be a comparison between \textit{euclidean distance} threshold against \textit{alternating least square} methods and its parameters variations, different combinations of items and sessions were performed like the impact of temporal ordering or shuffling items by timestamp, different affinity propagation damping factors and different sizes of sessions.
+    
+    % DONE Galante: Colocar aqui um parágrafo inicial descrevendo Objetivo Geral do capítulo; Avaliar o que para saber o que?
+    The objective of this experiment is evaluating the accuracy of a content-only method of session splitting, without the need of user profiling, then contrasting to a technique that uses some sort of profiling, based on item similarity and matrix factorization method such as \textit{alternate least squares}.
+    
+    There will be a comparison between \textit{euclidean distance} threshold against \textit{alternating least square} methods and its parameters variations, different combinations of items and sessions were performed like the impact of temporal ordering or shuffling items by timestamp, different affinity propagation damping factors and different sizes of sessions.
     
     On section \ref{globo_dot_com_dataset} Globo dataset properties are presented, on \ref{euclidean_distance_heuristic}, section \ref{session_simulation} the simulation of sessions as metric method is adressed with its results and on \ref{affinity_propagation_results} error heatmaps from iterations are shown.
 
-    % TODO como foi separado test data vs non-test data, foi seguido o mesmo método do Zhang 1/4 vs 3/4??
-    % TODO talvez seja interessante uma seção de performance(precision and recall) e limites do algoritmo (e do método de clusterização)
-    % TODO seção pode ser chamada apenas de Datasets
     \section{Dataset} \label{globo_dot_com_dataset}
-    %TODO contextualização disso nesse capítulo
     The dataset of choice was globo.com news dataset, it is a collection that consists on the following:
     \begin{itemize}
         \item approximately 2.8 millions news clicks
@@ -644,7 +655,6 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
     
         The objective of this metric is finding a lower than 50\% mean error and the lowest \(standard\ deviation\).
         
-        % TODO explicar resultados, foram bons? foram ruins?
         \begin{figure}[htp]
             \centering
             \includegraphics[width=0.95\textwidth]{images/error_mean.png}
@@ -739,13 +749,16 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
 % =======================================================================
 
 \chapter{Conclusion}
+Different previous session splitting heuristics were presented from time-based to profile-based and their privacy versus accuracy trade-offs along with its flaws were addressed, later an experiment of session splitting based on content-only against profile-based had their accuracy stressed.
+% DONE Galante: Colocaria um primeiro parágrafo resumindo tudo o que o trabalho fez. Tipo o resumo mas como concluído, só para lembrar o leitor do todo.
+
 % Given the event-driven nature of news
 The error standard deviation presented on the heatmaps with different input parameters reveals that the euclidean distance as threshold method does not have enough precision, but these results could have many explanations not only from the method itself. Since globo dataset is closed source and the embedding features available from \cite{moreira2018chameleon} were created from his own algorithm, a certain level of belief was implied that the embeddings really reflected its content and his algorithm worked well on quantitatively describing them.
 
 The ALS algorithm method evaluation showed that there were no relevant item similarity between users itself against other users, meaning that rather this is a cause of the chaotic nature of news or tSNE as dimensionality reduction wasn't precise enough to classify the different news topics.
 
 %TODO talk about the flaw of this method, like users with same interest sharing account 
-Finally, news as a type of media have event-driven and chaotic nature, even when readers have his preference for certain topics, unexpected and relevant news from other topics may arrive and catch the readers eyes, those phenomena are maybe common, thus, the proposed method of sessionization by euclidean distance is not a good candidate to split sessions based on its content.
+Finally, news as a type of media have event-driven and chaotic nature, even when readers have his preference for certain topics, unexpected and relevant news from other topics may arrive and catch the readers eyes, those phenomena are maybe common, thus, the proposed method of sessionization by euclidean distance is not a good candidate to split sessions based on news-content.
 
 
 \bibliographystyle{packages/abntex2-alf}
