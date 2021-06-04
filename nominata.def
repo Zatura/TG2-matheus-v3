@@ -47,7 +47,7 @@
 
 % Graduação
 \providecommand{\nominataPRAG}{Prof\textsuperscript{a}.~Cíntia Inês Boll}
-\providecommand{\nominataPRAGname}{Pr{\'o}-Reitora de Gradua{\c{c}}{\~a}o}
+\providecommand{\nominataPRAGname}{Pr{\'o}-Reitora de Ensino}
 
 %CIC
 \providecommand{\nominataCoordCIC}{Prof.~S{\'e}rgio Luis Cechin}

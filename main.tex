@@ -14,6 +14,7 @@
 \usepackage{fixmath}          % pacote de math international standardization
 \usepackage[alf,abnt-emphasize=bf]{abntex2cite}	% pacote de citações abnt
 \usepackage{subcaption}
+% \usepackage{natbib}
 
 \newtheorem{definition}{Definition}
 
@@ -29,7 +30,7 @@
 \keyword{clustering}
 \keyword{user profiling}
 \keyword{session identification}
-\keyword{recommendation systems}
+\keyword{recommender systems}
 
 \begin{document}
 
@@ -54,7 +55,7 @@ Special thanks to Carolina Nery that helped me with discussions and insights dur
 \end{flushright}
 
 \begin{abstract}
-  Although some content providers register stream data from its users and can track their profile style for content recommendation, when two or more users share a same account, their true profile activity is obfuscated and fuzzed. This user behavior hinders the recommendation systems from providers, moreover, the growing concerns on user privacy poses a risk to current models that rely on unconcealed user identity. This work proposes a way of classifying users' stream data trough sessions, based only on its media content, opening the possibility for breaking a same account profile within multiple user profiles and consequently identifying this activity. In this work dimensionality reduction and clustering methods are used to classify user stream data into sessions that correspond to each respective user profile.
+  Although some content providers register stream data from its users and can track their profile style for content recommendation, when two or more users share a same account, their true profile activity is obfuscated and fuzzed. This user behavior hinders the recommender systems from providers, moreover, the growing concerns on user privacy poses a risk to current models that rely on unconcealed user identity. This work proposes a way of classifying users' stream data trough sessions, based only on its media content, opening the possibility for breaking a same account profile within multiple user profiles and consequently identifying this activity. In this work dimensionality reduction and clustering methods are used to classify user stream data into sessions that correspond to each respective user profile.
   Experiments show that the event-driven nature of news content can challenge the construction of a session splitting method based exclusively on content-type without user profiling.
     %DONE Galante: Incluir uma última frase ... Experimentos mostram que ... (dizer os melhores resultados para sinalizar que fizemos experimentos)
 \end{abstract}
@@ -89,9 +90,9 @@ Special thanks to Carolina Nery that helped me with discussions and insights dur
 
 %TODO No final da introdução atualizar o paragrafo que explica brevemente cada capítulo.  
 \chapter{Introduction}
-Most platforms nowadays rely on recommendation systems to create plug and play interactions between users and offered items, avoiding search time and making platform navigation minimal and crisp, however, some user behaviours or even the emerging privacy laws and growing concerns on data privacy, recommendation systems precision can get affected by profiling contamination on the user-item relations  and its interpretation by the system.
+Most platforms nowadays rely on recommender systems to create plug and play interactions between users and offered items, avoiding search time and making platform navigation minimal and crisp, however, some user behaviours such as account sharing or even the emerging privacy laws and growing concerns on data privacy that could hide user behaviour, recommender systems precision can get affected by profiling contamination on the user-item relations  and its interpretation by the system.
 
-One commonly known example responsible for grinding the recommendation systems performance is the practice of account sharing that mixes and masks its account profiles against its real users. Account sharing behaviour is non-intentional in most cases, since device sharing is common, there could be a situation where some individual into his computer is searching videos in a logged-in streaming platform for specific subjects like for example C++ usage, but at some point, it leaves the computer empty without performing account logout, another individual then starts using the same device and platform but for a completely different subject, like children's cartoon.
+One commonly known example responsible for grinding the recommender systems performance is the practice of account sharing that mixes and masks its account profiles against its real users. Account sharing behaviour is non-intentional in most cases, since device sharing is common, there could be a situation where some individual into his computer is searching videos in a logged-in streaming platform for specific subjects like for example C++ usage, but at some point, it leaves the computer empty without performing account logout, another individual then starts using the same device and platform but for a completely different subject, like children's cartoon.
 
 This problem is evident on commonly used time-based session identification techniques such as \cite{halfaker2015}, the presented scenario would fail in identifying sessions, if chosen period threshold for breaking sessions is long enough, the elapsed time from user permutation usage on platform could be insignificant on the total session time, thus preserving the unity of the session, but in reality two completely sessions have happened during this period.
 
@@ -100,10 +101,9 @@ On \cite{jiang2018} its main goal is identifying shared accounts in multimedia s
 The proposed work consists in two global objectives: (i) Verifying the possibility of an algorithm for session identification based on item category instead of timeout, 
 (ii) Create an evaluation method for reliably testing its accuracy and precision.
 
-\textit{globo.com} dataset offered a good amount of data, it was preferred instead of others due to it's availability and data abundance, however, since they do not allow the use of news content, \cite{moreira2018chameleon} made available its embeddings that carries 250 dimensions of features for each of more than 300,000 articles, also \textit{globo.com} dataset aggregates streams of user clicks with more than 2.8 millions of clicks with labeled information such as user\_id and timestamp; the attribute of stream click is addressed at section \ref{globo_dot_com_dataset}.
+In order to execute those global objectives, \textit{globo.com} dataset was preferred instead of others due to it's availability and data abundance, however, since they do not allow the use of news content, \cite{moreira2018chameleon} made available its embeddings that carries 250 dimensions of features for each of more than 300,000 articles, also \textit{globo.com} dataset aggregates streams of user clicks with more than 2.8 millions of clicks with labeled information such as user\_id and timestamp; the attribute of stream click is addressed at section \ref{globo_dot_com_dataset}. Another dataset for that could be used as subject of matter is the \textit{lastFM\ millions\ song\ dataset} of \cite{bertin2011million}
 Dimensionality reduction technique was needed in order to reduce complexity of data and apply the \(Affinity Propagation\) clustering algorithm. 
 
-%TODO Está um pouco genérico, especificar alguns pontos.
 This work is organized as follow: Initially on chapter \ref{theoretical_background} basic concepts and methods needed to fulfil the following reasoning are introduced, later related works on chapter \ref{related_works} that backed the choices made on this project. On the chapter \ref{methodology} the session problem modelling is introduced and described as well as known problems for multidimensional data and its manipulation. The section \ref{algorithms} that follows introduce solutions for the defined problems.
 Finally, on chapter \ref{experiments} error measurement modeling is addressed along with it metrics results.
 
@@ -140,17 +140,20 @@ At subsection \ref{basic_concepts}, basic concepts and attributes are introduced
         account sharing or even user profiling for different user tastes.
 
 
-        \section{Recommendation system}
-        The role of a \textit{recommendation system} is to make inferences of new \(items\) that the \(user\) would like and suggest them. It is a set of algorithms that together they can return for example an ordered list of probability/similarity from items that were previously compared against other items. These other items must be similar from the ones that the \(account\) have interacted or similar accounts have interacted with.
+        \section{Recommender system}
+        The role of a \textit{recommender system} is to make inferences of new \(items\) that the \(user\) would like and suggest them. It is a set of algorithms that together they can return for example an ordered list of probability/similarity from items that were previously compared against other items. These other items must be similar from the ones that the \(account\) have interacted or similar accounts have interacted with.
         Variables such as click-rate, visit frequency, time spent on page can be considered to calculate an affinity between interacted \(items\) and \(account\).
 
-        A recommendation system can have four main classifications:
+% 	- Sistemas de recomendação: conteúdo, colaborativo, híbrido
+% 		qual ref. p/ quarta classificação?
+        % this is not 4 approaches, they are ortogonal Implicit vs Explicit and Content-based vs Collaborative
+        Nowadays companies such as \textit{Netflix} uses hybrid versions that combine multiple types of recommender systems, but commonly the recommender systems are classified between the two following type spectrums:
         \begin{itemize} 
             \item Implicit vs Explicit
             \item Content-based vs Collaborative
         \end{itemize}
 
-        \textit{Implicit vs Explicit} definitions correspond to the way data is semantically related between the pair \(account\)-\(item\). On \(Implicit\) recommendation systems there is an implicit relationship between the used item and the expectation that the majority of those items are desirable by its user, on the other side of the spectrum, there are the \(Explicit\) recommendation systems that usually uses a rate system given by the \(user\), so there is not just a simple link between both entities, but also a subjective magnitude that could be either positive or negative, qualitatively speaking.
+        \textit{Implicit vs Explicit} definitions correspond to the way data is semantically related between the pair \(account\)-\(item\). On \(Implicit\) recommender systems there is an implicit relationship between the used item and the expectation that the majority of those items are desirable by its user, on the other side of the spectrum, there are the \(Explicit\) recommender systems that usually uses a rate system given by the \(user\), so there is not just a simple link between both entities, but also a subjective magnitude that could be either positive or negative, qualitatively speaking.
 
         \textit{Content-based vs Collaborative} classifies on an \(account\)-\(account\) relationship. On the first one the similarity between interacted items on a same account is used to retrieve similar new items that the user didn't yet explored, on the second one, the comparison is based upon other accounts that share similarity, so items from these accounts that are missing on the interaction history can be recommended. On state of art systems, both methods are combined in order to get the best results.    
         
@@ -194,11 +197,11 @@ At subsection \ref{basic_concepts}, basic concepts and attributes are introduced
 % =======================================================================
 
 \chapter{Related work} \label{related_works}
-There were a clear distinction between timeout, time-decay and profile-based models on account sharing and user identification related works, for that reason, they are presented as follow divided by three addressed categories as timeout, time-decay and profile-based methods.
+There is a distinction between timeout, time-decay and profile-based models for account sharing and user identification related works, for that reason, they are presented as follow divided by three addressed categories as timeout, time-decay and profile-based methods.
 
 \section{Timeout models}
 
-An attempt to categorize user sessions at Youtube platforms, \cite{gill2008} made a distinction between user level and session level characterization, its definition of session beginning and end is a timeout fashion and the explanation for this is that analyzing traffic network is challenging because most of times there is no clear registry of login and logout. They used a benchmark technique to define what is the best time threshold that would really define a session; they found out that 40 minutes of inactivity as threshold is the spot because from this point on, the number of sessions starts to level-off considerably.
+An attempt to categorize user sessions at Youtube platforms, \cite{gill2008} made a distinction between user level and session level characterization, its definition of session beginning and end is a timeout fashion and the explanation for this is that analyzing traffic network is challenging because most of times there is no clear registry of login and logout. They used a benchmark technique to define what is the best time threshold that would really define a session; they found out that 40 minutes of inactivity as threshold is the spot because from this point on, the number of sessions start to level-off considerably.
 Nonetheless, they do not take into account multiple users swapping use like scenarios were a computer can have a very fast turn over, like lan-houses or public spaces with computers or even paid multi-platform account sharing such as \url{togetherprice.com} and \url{kotas.com.br}.
 
 % 1 Hora
@@ -225,9 +228,9 @@ Some methods proposes RNNs in order to extract features from  items, one of them
 % Session split based on sliding window number of pages
 On \cite{jindal2020} et al, they propose a dynamic threshold heuristic based on user behaviour history, their discoveries show that short time user navigation are more often and less correlated than longer ones, making them easier to categorize and achieving a higher accuracy. However, this method apply a threshold into the user behaviour pattern, and differently, this work relies on the distance between topics inside a session, also the proposed method uses fixed threshold for simplicity reasons.
 
-\cite{zhang2012} addressed the problem of account sharing and modeled an algorithm for identifying movie ratings from individual users sharing an account. It is used a model of union of linear subspaces for spotting shared accounts and a model of clustering for user identification per account. This algorithm has good accuracy on most cases, showing that it is possible to identify a distinction from each user based on item category and action, however, this algorithm is restricted for explicit recommendation systems and movie datasets tend to be smaller in size and category amount in comparison to other media datasets.
+\cite{zhang2012} addressed the problem of account sharing and modeled an algorithm for identifying movie ratings from individual users sharing an account. It is used a model of union of linear subspaces for spotting shared accounts and a model of clustering for user identification per account. This algorithm has good accuracy on most cases, showing that it is possible to identify a distinction from each user based on item category and action, however, this algorithm is restricted for explicit recommender systems and movie datasets tend to be smaller in size and category amount in comparison to other media datasets.
 
-A problem that e-commerce recommendation systems face is when an advertisement of an exact size or individual characteristic for an user is required, because other users may end up contaminating the account history and spoiling the estimate of these unique attributes or sizes, on \cite{sembium2018} the problem is discussed using Amazon.com e-commerce, instead of dealing with each account as a specific user and single profile, they propose a multi-persona approach boosting the accuracy, however, this method does not work well on products that have a high variability on its characteristics and it was only applied on an e-commerce platform, where there is a high repeatably of items.
+A problem that e-commerce recommender systems face is when an advertisement of an exact size or individual characteristic for an user is required, because other users may end up contaminating the account history and spoiling the estimate of these unique attributes or sizes, on \cite{sembium2018} the problem is discussed using Amazon.com e-commerce, instead of dealing with each account as a specific user and single profile, they propose a multi-persona approach boosting the accuracy, however, this method does not work well on products that have a high variability on its characteristics and it was only applied on an e-commerce platform, where there is a high repeatably of items.
 
 % does not use sessions, it uses user ratings
 \cite{verstrepen2015} proposes a top-N recommender system for solving account sharing problems, three common problems are categorized and solved:
@@ -237,17 +240,17 @@ A problem that e-commerce recommendation systems face is when an advertisement o
     \item \textbf{Presentation problem} addresses the difficulty of recommending an item for the current user and not the other idle users.
 \end{itemize}
 
-This model uses binary positive-only feedback as items and besides they used movie ratings datasets, their model probably can be used on implicit recommendation systems because they share the binary feedback model between user and items.
+This model uses binary positive-only feedback as items and besides they used movie ratings datasets, their model probably can be used on implicit recommender systems because they share the binary feedback model between user and items.
 Their approach uses normalized cosine similarity with KNN \cite{fix1951} to produce the account-item score recommendation matrix, then they introduce their novel DAMIB-COVER algorithm that solves the generality problem by differentiating scores between a big sum of few similarities and a small sum of a lot similarities from users in a same account.
 
-The problem of cross-domain along with account sharing is well addressed on \cite{ma2019} that proposes a \textit{Sequential Recommendation System}, they use a a sequence encoder in each domain to update the recommendation state when each item arrives, along with this there is a \textit{shared account filter unit (SFU)} on each domain to recognize the weight of each user from an arrived item, those informations are exchangeable between each domain, where the final prediction is calculated by a \textit{cross-domain transfer unit (CFU)} that takes into account other domains \textit{SFUs}. Differently from described related works, pi-net is not session-based nor explicitly time-decay based, however, since the SFU unit and its sequence encoder is actually some kind of linked RNNs unit, there is an implicit time decay, since when new items arrive they tend over time to fade the impact of older items when modifying RNNs internal weights, along with this fact, their method is restricted to TV domains and they do not address news articles.
+The problem of cross-domain along with account sharing is well addressed on \cite{ma2019} that proposes a \textit{Sequential recommender system}, they use a a sequence encoder in each domain to update the recommendation state when each item arrives, along with this there is a \textit{shared account filter unit (SFU)} on each domain to recognize the weight of each user from an arrived item, those informations are exchangeable between each domain, where the final prediction is calculated by a \textit{cross-domain transfer unit (CFU)} that takes into account other domains \textit{SFUs}. Differently from described related works, pi-net is not session-based nor explicitly time-decay based, however, since the SFU unit and its sequence encoder is actually some kind of linked RNNs unit, there is an implicit time decay, since when new items arrive they tend over time to fade the impact of older items when modifying RNNs internal weights, along with this fact, their method is restricted to TV domains and they do not address news articles.
 
 \section{Comparative Analysis}
-% TODO: Galante Acho que seria legal uma última sessão de análise comparativa, onde você define itens de comparação e compara os trabalhos. Finaliza com um parágrafo dizendo quais são os pontos em aberto (gaps) que o seu trabalho soluciona
+The problem of time-based models like \cite{halfaker2015, gill2008, sottocornola2018}, is that they are not able to split sessions based on individual users, since if many users share a device at the period of a defined session, they would be considered a single user, leading to the \textit{generality problem} addressed by \cite{verstrepen2015}.
+
+Profile-based recommender systems such as \cite{zhang2019, verstrepen2015} rely on account profiling based on item history, trading account privacy for accuracy, other hybrid models like \cite{jindal2020, jiang2018} that mixes both solutions also rely on user profiling and behaviour and user privacy is at risk. For instance even the time-based model as \cite{gill2008} have its algorithm relying on internet traffic, posing risk to personal information.
     
-
-% Não depende do conceito de sessões de uso. Além disso, aplica-se a um domínio específico, que é o de conteúdos de TV
-
+    
 % =======================================================================
 
 \chapter{Methodology} \label{methodology}
@@ -278,19 +281,17 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
         Time-based sessions are the most commonly used as consensus as a method for example at \cite{sottocornola2018} it is used a defined session trough a fixed time, but the way they make it flexible, were by using a decaying time-based weight into the session items, they used this approach to overcome the short life-span of news. At the proposed method, since not the news itself, but it's topic, the short life-span problem wasn't expected to be relevant enough.
     
         \subsection{Data scarcity and sparcity} \label{data_scarcity_and_sparcity}
-        \textbf{Cold start problem.} This flaw is addressed mostly to \textit{collaborative filtering} recommendation systems, since it is content-centric, when an user is fresh and he has little or no content history, the method lacks on precision resulting on spurious extrapolations.
+        \textbf{Cold start problem.} This flaw is addressed mostly to \textit{collaborative filtering} recommender systems, since it is content-centric, when an user is fresh and he has little or no content history, the method lacks on precision resulting on spurious extrapolations.
     
         A \textit{content-based} system is no different in terms of this flaw, but it is more resistant since it uses content history, it can fill the gap against data scarcity from fresh users.
         
-        % TODO sugestão: refazer as primeiras métricas com 200 items também.
         In order to avoid this dilemma, the proposed metrics are based on previously filtered sessions, where the first method use sessions with more than 10 items, and the second method, more than 200 items.
     
-        \textbf{Curse of dimensionality Problem.} Since content analysis and classification requires a complex analysis that generates great amounts of features/dimensions and usually recommendation systems data are sparse, the curse of dimensionality \cite{marimont1979} is very relevant as a problem because usually any media content should be translated into a multi dimensional space before the classification, contributing to a non-ending crescendo \textit{curse of dimensionality}.
+        \textbf{Curse of dimensionality Problem.} Since content analysis and classification requires a complex analysis that generates great amounts of features/dimensions and usually recommender systems data are sparse, the curse of dimensionality \cite{marimont1979} is very relevant as a problem because usually any media content should be translated into a multi dimensional space before the classification, contributing to a non-ending crescendo \textit{curse of dimensionality}.
     
     \newpage
     \section{Overview}
-    % DONE: Galante Eu acho que é muito detalhe para introdução. Acho que ficaria melhor se fosse a primeira seção do capítulo da metodologia. tipo "Overview"  -> Eu colocaria depois das definições como seção 4.2 (Sinalizei lá no capítulo 4)
-        Two main methods of evaluation are addressed, the first is an \textit{euclidean distance} based method were the distance between each article content is considered; the second evaluation method relies on \textit{matrix factorization} such as ALS technique \cite{takane1977} where the read frequency from labeled news topics from each user acts as a form of implicit recommendation system.
+        Two main methods of evaluation are addressed, the first is an \textit{euclidean distance} based method were the distance between each article content is considered; the second evaluation method relies on \textit{matrix factorization} such as ALS technique \cite{takane1977} where the read frequency from labeled news topics from each user acts as a form of implicit recommender system.
         
         The image below describes in general terms the pipeline of both proposals
         
@@ -300,10 +301,9 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
             \caption{Proposed validation method}
             \label{fig:method_architecture}
         \end{figure}
-    % DONE: Galante Colocar o texto que está na introdução (com a imagem)
     
     \newpage
-    % DONE: Galante Aqui se chamaria "Algoritmos Utilizados" ou alguma outra palavra para sinalizar para o leitor que são algoritmos de outros autores senão damos a impressão que é proposta  nossa, se for proposta nossa, precisamos colocara o algoritmo.
+
     \section{Used algorithms} \label{algorithms}
     
     On this section, all the used algorithms will be described as well as its historic evolution against their pioneers.
@@ -322,6 +322,7 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
     
     To think what would happen using a excessively linear algorithm like PCA to find the best surface, imagine a zig-zagged bent bread and you want to cut the middle of it with a knife, PCA would make a straight line cut ignoring the format of the bread. In that case, the algorithm they recommend is tSNE, a modern and state-of-art technique for dimensional reduction that uses machine learning and gradient descend techniques.
     
+    % Wives: E se não seguir uma curva normal?	
     \textbf{tSNE (t-distributed stochastic neighbor embedding)} also maps highly dimensional data into a low dimensional representation resuming the data and resisting against dimensionality curse as mentioned \cite{marimont1979}, but differently from PCA, tSNE \cite{maaten2008} is a non-linear method, this method preserves local geometry and deform global geometry, more specifically, it tends to clump points that share a near neighborhood making the clusters more evident.
     Non-linear means that if you have highly dimensional data that has a geometric representation of a curvy non-convex surface of points, for example, PCA due to its linearity would make a straight cut into this curve finding straight planes and never really fitting into the curvy surface, PCA has its algorithms variances that reduce its problems, like the Kernel PCA, but tSNE is considered to be the state-of-art for reasons below.
 
@@ -425,7 +426,6 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
 \chapter{Experiments} \label{experiments}  
 
     
-    % DONE Galante: Colocar aqui um parágrafo inicial descrevendo Objetivo Geral do capítulo; Avaliar o que para saber o que?
     The objective of this experiment is evaluating the accuracy of a content-only method of session splitting, without the need of user profiling, then contrasting to a technique that uses some sort of profiling, based on item similarity and matrix factorization method such as \textit{alternate least squares}.
     
     There will be a comparison between \textit{euclidean distance} threshold against \textit{alternating least square} methods and its parameters variations, different combinations of items and sessions were performed like the impact of temporal ordering or shuffling items by timestamp, different affinity propagation damping factors and different sizes of sessions.
@@ -750,18 +750,17 @@ On the section \ref{algorithms} the algorithms used for solving most of those pr
 
 \chapter{Conclusion}
 Different previous session splitting heuristics were presented from time-based to profile-based and their privacy versus accuracy trade-offs along with its flaws were addressed, later an experiment of session splitting based on content-only against profile-based had their accuracy stressed.
-% DONE Galante: Colocaria um primeiro parágrafo resumindo tudo o que o trabalho fez. Tipo o resumo mas como concluído, só para lembrar o leitor do todo.
 
-% Given the event-driven nature of news
 The error standard deviation presented on the heatmaps with different input parameters reveals that the euclidean distance as threshold method does not have enough precision, but these results could have many explanations not only from the method itself. Since globo dataset is closed source and the embedding features available from \cite{moreira2018chameleon} were created from his own algorithm, a certain level of belief was implied that the embeddings really reflected its content and his algorithm worked well on quantitatively describing them.
 
 The ALS algorithm method evaluation showed that there were no relevant item similarity between users itself against other users, meaning that rather this is a cause of the chaotic nature of news or tSNE as dimensionality reduction wasn't precise enough to classify the different news topics.
 
-%TODO talk about the flaw of this method, like users with same interest sharing account 
 Finally, news as a type of media have event-driven and chaotic nature, even when readers have his preference for certain topics, unexpected and relevant news from other topics may arrive and catch the readers eyes, those phenomena are maybe common, thus, the proposed method of sessionization by euclidean distance is not a good candidate to split sessions based on news-content.
 
+Since \textit{tSNE} resulting plane dataset from \textit{globo.com} seems to have data clumps and connections between some of them, a future work could imply in using density-based algorithms such as \textit{DBSCAN} from \cite{ester1996} on cluster analysis step instead of distance-based algorithms like affinity propagation. Considering the chaotic nature of news events and user choice over topics, another subject for further investigation is the likeliness of a user to change its topic into a single session and how that impacts the recommender system accuracy, a further comparison against other dataset such as \textit{LastFM million song dataset} could be performed.
 
 \bibliographystyle{packages/abntex2-alf}
+% \bibliographystyle{plainnat}
 \bibliography{biblio}
 
 \end{document}
